@@ -10,9 +10,16 @@ Create a Web App to visualize extreme ocean temperatures and send alerts to user
 Anyone is welcome to sign up. Send a message to @mphemming or to @ribeiron on the OHW AUS Slack Channel if you want to be added as a collaborator. 
 
 ## Background
+
 The intensity and frequency of extreme ocean temperature events, such as marine heatwaves (MHWs) and marine cold spells (MCSs), are expected to change as our oceans warm. Little is known about marine extremes in Australian coastal waters, particularly below the surface. 
 
-[more to be added here]
+We have close to 15 years of subsurface mooring data, and more than 65 years of ship profile data at sites around Australia, including off Port Hacking, NSW and Maria Island, Tas. [Ocean data products](https://essd.copernicus.org/articles/16/887/2024/essd-16-887-2024.html) exist at these sites, but there is presently no easy method to visualise the data online. 
+It would be great to create a web app that shows clearly when and at what depth record temperatures have been measured, and when MHW and MCSs have occured. We can draw on popular apps such as this [MHW tracker for surface data](https://www.marineheatwaves.org/tracker.html), and [isithotrightnow](https://isithotrightnow.com/) for inspiration. 
+
+It can be challenging to keep track of extreme ocean temperatures, and to compare newly recorded data sets with historical context. Hence, an alert system that identifies extreme ocean temperatures and potential QC issues would also be very handy.
+
+We also now have >15,000 [FishSOOP Temperature profiles](https://www.unsw.edu.au/research/oceanography/fishsoop) that have been collected since 2021. Hence, we can test the same alert system used for mooring data with this data set to check for potential QC issues, and with the help of a Machine Learning data set, check for potentially extreme temperatures. 
+
 
 ![snoop-dogg-dance (1)](https://github.com/user-attachments/assets/2fbd026a-ac1e-44d0-8afa-6c71d8d7c706)
 
@@ -20,7 +27,7 @@ The intensity and frequency of extreme ocean temperature events, such as marine 
 ## Goals
 Create a Web App that:​
 
-- Visualises extreme ocean temperatures ​
+- Visualises extreme ocean temperatures ​(MHW/MCSs, records)
 
 - ​Alerts users when:​
 
@@ -35,13 +42,14 @@ Create a Web App that:​
 ## Datasets
 - IMOS Mooring data:
   
-  - MHW data products at Port Hacking and Maria Island (NetCDF, CSV)​
+  - MHW data products at [Port Hacking](https://thredds.aodn.org.au/thredds/catalog/UNSW/NRS_extremes/Temperature_DataProducts_v2/PH100/catalog.html) and [Maria Island](https://thredds.aodn.org.au/thredds/catalog/UNSW/NRS_extremes/Temperature_DataProducts_v2/MAI090/catalog.html) (NetCDF, CSV)​
     
-  - Long-Term Time Series Product (LTS) at Port Hacking and Maria Island​
+  - [Long-Term Time Series Product](https://imos.org.au/news/aodn/new-user-friendly-time-series-products-from-the-imos-coastal-mooring-network) (LTS) at [Port Hacking](https://thredds.aodn.org.au/thredds/catalog/IMOS/ANMN/NSW/PH100/catalog.html) and [Maria Island](https://thredds.aodn.org.au/thredds/catalog/IMOS/ANMN/NRS/NRSMAI/catalog.html)​
     
-- FishSOOP: aggregated product including SST and ML predictions (NetCDF)​
+- IMOS FishSOOP data:
+  - aggregated profile product, including near-profile satellite SST and preliminary ML profile predictions (NetCDF, on request from @mphemming)​
   
-- ML Random Forest Regressor model ​
+- Preliminary ML Random Forest Regressor model ​(~6 GB, on request from @mphemming)
 
 [links to come] 
 
@@ -61,4 +69,7 @@ Create a Web App that:​
     - QC issues: outliers, drift​
 
 ## References
-1. "Is it hot right now?" Website https://www.isithotrightnow.com
+1. AMDOT-EXT data products https://essd.copernicus.org/articles/16/887/2024/essd-16-887-2024.html
+2. "MHW tracker" Website https://www.marineheatwaves.org/tracker.html
+3. "Is it hot right now?" Website https://www.isithotrightnow.com
+4. IMOS LTSPs https://imos.org.au/news/aodn/new-user-friendly-time-series-products-from-the-imos-coastal-mooring-network
