@@ -7,7 +7,7 @@ Message Me When It's Hot - The MHW Visualisation and Report App
 Create a Web App to visualize extreme ocean temperatures and send alerts to users when it is TOO HOT!
 
 ## Collaborators
-Anyone is welcome to sign up. Send a message to @mhemming or to @ribeironif you want to be added as a collaborator. 
+Anyone is welcome to sign up. Send a message to @mphemming or to @ribeiron on the OHW AUS Slack Channel if you want to be added as a collaborator. 
 
 ## Background
 The intensity and frequency of extreme ocean temperature events, such as marine heatwaves (MHWs) and marine cold spells (MCSs), are expected to change as our oceans warm. Little is known about marine extremes in Australian coastal waters, particularly below the surface. 
