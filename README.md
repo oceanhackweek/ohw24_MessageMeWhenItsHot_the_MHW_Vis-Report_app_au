@@ -14,6 +14,8 @@ The intensity and frequency of extreme ocean temperature events, such as marine 
 
 [more to be added here]
 
+![snoop-dogg-dance (1)](https://github.com/user-attachments/assets/2fbd026a-ac1e-44d0-8afa-6c71d8d7c706)
+
 
 ## Goals
 Create a Web App that:​
