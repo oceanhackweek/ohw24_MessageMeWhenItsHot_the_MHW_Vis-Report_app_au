@@ -38,6 +38,7 @@ Create a Web App that:​
   - QC issues are identified (e.g. outliers, drift)​
 
 ​The idea is to create a Web App that shows plots similar to the ones in https://www.isithotrightnow.com, but for the ocean. 
+Can look at code from [this project last year](https://github.com/oceanhackweek/ohw23_proj_fancymoorings) - [presentation](https://www.youtube.com/watch?v=90t6h36-BOQ&list=PLVH-j9gOscWmTQNctTx07pf97BRuUxCBX&index=3)
 
 ## Datasets
 - IMOS Mooring data:
