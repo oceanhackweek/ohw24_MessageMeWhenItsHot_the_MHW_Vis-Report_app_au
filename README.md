@@ -13,12 +13,12 @@ Anyone is welcome to sign up. Send a message to @mphemming or to @ribeiron on th
 
 The intensity and frequency of extreme ocean temperature events, such as marine heatwaves (MHWs) and marine cold spells (MCSs), are expected to change as our oceans warm. Little is known about marine extremes in Australian coastal waters, particularly below the surface. 
 
-We have close to 15 years of subsurface mooring data, and more than 65 years of ship profile data at sites around Australia, including off Port Hacking, NSW and Maria Island, Tas. [Ocean data products](https://essd.copernicus.org/articles/16/887/2024/essd-16-887-2024.html) exist at these sites, but there is presently no easy method to visualise the data online. 
+The Integrated Marine Observing System (IMOS) National Mooring Network Facility has close to 15 years of subsurface mooring data, and more than 65 years of ship profile data at sites around Australia, including off Port Hacking, NSW and Maria Island, Tas. [Ocean data products](https://essd.copernicus.org/articles/16/887/2024/essd-16-887-2024.html) exist at these sites, but there is presently no easy method to visualise the data online. 
 It would be great to create a web app that shows clearly when and at what depth record temperatures have been measured, and when MHW and MCSs have occured. We can draw on popular apps such as this [MHW tracker for surface data](https://www.marineheatwaves.org/tracker.html), and [isithotrightnow](https://isithotrightnow.com/) for inspiration. 
 
 It can be challenging to keep track of extreme ocean temperatures, and to compare newly recorded data sets with historical context. Hence, an alert system that identifies extreme ocean temperatures and potential QC issues would also be very handy.
 
-We also now have >15,000 [FishSOOP Temperature profiles](https://www.unsw.edu.au/research/oceanography/fishsoop) that have been collected since 2021. Hence, we can test the same alert system used for mooring data with this data set to check for potential QC issues, and with the help of a Machine Learning data set, check for potentially extreme temperatures. 
+IMOS also now has >15,000 [FishSOOP Temperature profiles](https://www.unsw.edu.au/research/oceanography/fishsoop) that have been collected by the FishSOOP Facility since 2021. Hence, we can test the same alert system used for mooring data with this data set to check for potential QC issues, and with the help of a Machine Learning data set, check for potentially extreme temperatures. 
 
 
 ![snoop-dogg-dance (1)](https://github.com/user-attachments/assets/2fbd026a-ac1e-44d0-8afa-6c71d8d7c706)
@@ -74,3 +74,4 @@ Can look at code from [this project last year](https://github.com/oceanhackweek/
 2. "MHW tracker" Website https://www.marineheatwaves.org/tracker.html
 3. "Is it hot right now?" Website https://www.isithotrightnow.com
 4. IMOS LTSPs https://imos.org.au/news/aodn/new-user-friendly-time-series-products-from-the-imos-coastal-mooring-network
+5. IMOS National Mooring Network Facility descriptiom: https://imos.org.au/facility/national-mooring-network 
