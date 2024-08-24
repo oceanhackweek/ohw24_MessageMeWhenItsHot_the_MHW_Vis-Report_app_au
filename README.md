@@ -1,4 +1,4 @@
-# ohw24_MessageMeWhenItsHot_the_MHW_Vis&Report_app_au
+# ohw24_proj_MessageMeWhenItsHot_the_MHW_Vis&Report_app_au
 
 ## Project Name
 Message Me When It's Hot - The MHW Visualisation and Report App
