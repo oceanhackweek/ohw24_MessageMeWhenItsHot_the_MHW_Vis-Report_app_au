@@ -3,24 +3,21 @@
 # plot_MAI_PercentilesHeatMap.py
 
 # Author: Michael Hemming
-# Description: Plot MAI Percentiles Heatmap for every date, depth, and year
+# Description: Plot MAI Percentiles (Using temp anomalies for now) Heatmap for every date, depth, and year
 
 # %% --------------------------------------------------------------------
 # Import packages
 
 import xarray as xr
-import seaborn as sns
 import numpy as np
 import s3fs
 import pandas as pd
-import plotly.tools as tls
-import plotly.io as pio
 import cmocean
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 # %% --------------------------------------------------------------------
-# Load data
+# Load data using AWS S3
 
 s3 = s3fs.S3FileSystem(anon=True) 
 
@@ -42,6 +39,7 @@ def organize_temperature_into_dataframe(temp_dataarray):
     pandas.DataFrame: The filled DataFrame with temperatures.
     """
     
+    # Create an empty matrix with 31 rows and 12 columns
     empty_matrix = np.ones((31,12)) * np.nan
     
     # Iterate over the temperature data
@@ -58,90 +56,25 @@ def organize_temperature_into_dataframe(temp_dataarray):
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     days = list(range(1, 32))  # Days of the month (1 to 31)
-
+    # create dataframe with days on x-axis and months on y-axis
     df = pd.DataFrame(empty_matrix.transpose(), index=months, columns=days)
     df.index.name = 'Day'  # Set the index name to 'Day'
     
     return df
 
-
-# Example usage with a DataArray and an empty matrix
-ds = MAI090['TEMP'].sel(
-    TIME=slice('2022-01-01', '2022-12-31')).copy()
-ds.values = MAI090['TEMP'].sel(
-    TIME=slice('2022-01-01', '2022-12-31')).values - MAI090['TEMP_MEAN'].sel(
-                        TIME=slice('2022-01-01', '2022-12-31')).values
-
-Tanom1 = organize_temperature_into_dataframe(ds[:,1])
-Tanom0 = organize_temperature_into_dataframe(ds[:,0])
-# create heatmap
-plt.figure(figsize=(24,12))
-sns.heatmap(np.round(Tanom1,2), annot=True, cmap=cmocean.cm.balance, 
-            cbar_kws={'label': 'Temperature Anomaly'},  # Optional: Add colorbar label
-            xticklabels=1, yticklabels=1, cbar=False, 
-            annot_kws={"fontsize": 18}, linewidths=1, linecolor='black'  # Control the frequency of tick labels
-            )
-
-# Increase the fontsize of the tick labels, 
-plt.xticks(fontsize=30)
-plt.yticks(fontsize=30, rotation=360)
-plt.ylabel('')
-
-plt.tight_layout()
-
-# import plotly.graph_objects as go
-
-# Create the heatmap using Plotly
-fig = go.Figure(data=go.Heatmap(
-    z=Tanom1.values,
-    x=Tanom1.columns,
-    y=Tanom1.index,
-    colorscale='balance',  # Use the cmocean balance colormap
-    colorbar=dict(
-        title='Temperature Anomaly',
-        titleside='right',
-        titlefont=dict(size=18),
-        tickfont=dict(size=18)
-    ),
-    zmin=-2,  # Set the minimum value for the color scale
-    zmax=2,   # Set the maximum value for the color scale
-    showscale=False  # Hide colorbar if you don't need it
-))
-
-# Update layout for axis titles and tick labels
-fig.update_layout(
-    xaxis=dict(
-        tickfont=dict(size=30),
-        title='',
-    ),
-    yaxis=dict(
-        tickfont=dict(size=30),
-        title='',
-        tickvals=np.arange(Tanom.shape[0]),  # Set tick values if needed
-        ticktext=[str(i) for i in range(Tanom.shape[0])]  # Replace with actual y-tick labels
-    ),
-    title='Heatmap',
-    title_x=0.5,
-    title_font=dict(size=30),
-)
-
-# Show figure
-fig.show()
-
 # %% ------------------------------------------------------------------
-# get TEMP anom (all time)
+# Calculate TEMP anomalies (whole record)
 
+# Make a copy of the original dataset
 ds = MAI090['TEMP'].copy()
+# Calculate TEMP anomalies
 ds.values = MAI090['TEMP'].values - MAI090['TEMP_MEAN'].values
 
-
-
-
+# !!! Note: to be updated to records or percentiles 
 
 # %% -------------------------------------------------------------------
 # Function to split the data set into year and depth
-
-temp_dataarray = ds
+# Have a heatmap for each year and depth, saved inside a dictionary called 'split'
 
 def split_by_year_and_depth(temp_dataarray):
     """
@@ -174,11 +107,13 @@ def split_by_year_and_depth(temp_dataarray):
     return split
 
 
-split = split_by_year_and_depth(temp_dataarray)
+split = split_by_year_and_depth(ds)
 
 # %% -------------------------------------------------------------------
+# Create a plotly json file for the web app
 
 # Initialize variables to store the selected year and depth
+# (This will be the default heatmap when first opened)
 selected_year = '2012'  # default year
 selected_depth = '2m'  # default depth
 
@@ -186,74 +121,108 @@ selected_depth = '2m'  # default depth
 fig = go.Figure()
 
 # Add traces for all year and depth combinations
+# traces = plot/graphical objects that makes up a figure
+# Loop over each item in the dictionary called 'split'
 for key, data in split.items():
+    # Determine if this particular heatmap should be initially visible
+    # It's visible only if the current key matches a predetermined year and depth
     visible = key == f"{selected_year}_{selected_depth}"
+
+    # Split the key into year and depth components
+    # The key is expected to be in the format 'year_depthm', e.g., '2012_2m'
     year, depth = key.split('_')
+
+    # Create a heatmap object using Plotly's go.Heatmap
     heatmap = go.Heatmap(
-        z=data.values,
-        x=data.columns,
-        y=data.index,
-        colorscale='balance',
-        showscale=False,
-        zmin=-2, zmax=2,
-        visible=visible,  # Control initial visibility
-        name=f"{year} - {depth}"
+        z=data.values,            # Matrix of values to be displayed in the heatmap
+        x=data.columns,           # Labels or positions for the x-axis
+        y=data.index,             # Labels or positions for the y-axis
+        colorscale='balance',     # Color scale name for mapping values to colors
+        showscale=False,          # Whether or not to show the color scale bar
+        zmin=-2, zmax=2,          # Set the scale range for the heatmap colors
+        visible=visible,          # Use the previously determined visibility
+        name=f"{year} - {depth}"  # Name of the trace, used for legend entries
     )
+
+    # Add the created heatmap to the existing figure
     fig.add_trace(heatmap)
 
 # Function to update the visibility of heatmaps based on selected year and depth
 def create_visibility(selected_year, selected_depth):
+    # Returns a list of boolean values for each key in the 'split' dictionary
+    # True if the key matches the selected year and depth, False otherwise
     return [k == f"{selected_year}_{selected_depth}" for k in split.keys()]
 
 # Dropdown for Years
 year_buttons = [{
-    "label": year,
-    "method": "update",
-    "args": [{"visible": create_visibility(year, selected_depth)},
-             {"title": f"Heatmaps for Year: {year} and Depth: {selected_depth}"}]
-} for year in sorted(set(k.split('_')[0] for k in split.keys()))]
+    "label": year,  # Text to display on the dropdown button for each year
+    "method": "update",  # The action to perform when a button is clicked
+    "args": [
+        {"visible": create_visibility(year, selected_depth)},  # Update the visibility of heatmaps
+        {"title": f"Heatmaps for Year: {year} and Depth: {selected_depth}"}  # Update the chart title
+    ]
+} for year in sorted(set(k.split('_')[0] for k in split.keys()))]  # List comprehension to generate a button for each unique year
 
 # Dropdown for Depths
 depth_buttons = [{
-    "label": depth,
-    "method": "update",
-    "args": [{"visible": create_visibility(selected_year, depth)},
-             {"title": f"Heatmaps for Year: {selected_year} and Depth: {depth}"}]
-} for depth in sorted(set(k.split('_')[1] for k in split.keys()))]
+    "label": depth,  # Text to display on the dropdown button for each depth
+    "method": "update",  # The action to perform when a button is clicked
+    "args": [
+        {"visible": create_visibility(selected_year, depth)},  # Update the visibility of heatmaps
+        {"title": f"Heatmaps for Year: {selected_year} and Depth: {depth}"}  # Update the chart title
+    ]
+} for depth in sorted(set(k.split('_')[1] for k in split.keys()))]  # List comprehension to generate a button for each unique depth
+
 
 # Update layout with dual dropdowns
 fig.update_layout(
-    plot_bgcolor='white',  # Sets the plot background to white
+    plot_bgcolor='white',  # Sets the plot background to white for better readability
     paper_bgcolor='white',  # Sets the overall figure background to white
-    updatemenus=[
-        {"buttons": year_buttons, "direction": "down", "pad": {"r": 10, "t": 10},
-         "showactive": True, "x": 0.6, "xanchor": "left", "y": 1.09, "yanchor": "top"},
-        {"buttons": depth_buttons, "direction": "down", "pad": {"r": 10, "t": 10},
-         "showactive": True, "x": 0.7, "xanchor": "left", "y": 1.09, "yanchor": "top"}
+    updatemenus=[  # Configures the dropdown menus for user interactivity
+        {
+            "buttons": year_buttons,  # Buttons created previously for selecting years
+            "direction": "down",  # Dropdown expands downwards
+            "pad": {"r": 10, "t": 10},  # Padding around the dropdown
+            "showactive": True,  # Highlights the active button
+            "x": 0.6,  # X position of the dropdown (percentage of the total width)
+            "xanchor": "left",  # Anchor the dropdown at this x position
+            "y": 1.09,  # Y position of the dropdown (percentage above the plot area)
+            "yanchor": "top"  # Anchor the dropdown at this y position
+        },
+        {
+            "buttons": depth_buttons,  # Buttons created for selecting depths
+            "direction": "down",
+            "pad": {"r": 10, "t": 10},
+            "showactive": True,
+            "x": 0.7,  # Slightly to the right of the year dropdown
+            "xanchor": "left",
+            "y": 1.09,
+            "yanchor": "top"
+        }
     ],
     title=f"Temperature Anomalies for Year: {selected_year} and Depth: {selected_depth}",
     xaxis=dict(tickangle=0),  # Ensuring x-axis labels are horizontal
-    yaxis=dict(autorange='reversed')  # Invert y-axis
+    yaxis=dict(autorange='reversed')  # Invert y-axis so higher values appear lower
 )
 
-# Update layout properties
+# Additional updates to layout properties for axis settings
 fig.update_layout(
     xaxis=dict(
-        title="Day",
-        tickmode='array',
-        tickvals=list(range(1,len(Tanom0.columns)+1)),  # Ensure every x-tick has a label
-        ticktext=Tanom0.columns,  # Custom text for each tick, matching the column labels
-        tickangle=0,
-        # range=[0, 31]
+        title="Day",  # Label for the x-axis
+        tickmode='array',  # Explicitly specify tick positions and labels
+        tickvals=list(range(1, len(data.columns) + 1)),  # Positions for x-axis ticks
+        ticktext=data.columns,  # Text labels for x-axis ticks
+        tickangle=0  # Keep x-axis labels horizontal
+        # range=[0, 31]  # Optionally set the range of the x-axis
     ),
     yaxis=dict(
-        title="Month",
-        tickmode='array',
-        tickvals=list(range(len(Tanom0.index))),  # Ensure every y-tick has a label
-        ticktext=Tanom0.index,  # Custom text for each tick, matching the index labels
-        # range=[0, 12]
+        title="Month",  # Label for the y-axis
+        tickmode='array',  # Explicitly specify tick positions and labels
+        tickvals=list(range(len(data.index))),  # Positions for y-axis ticks
+        ticktext=data.index,  # Text labels for y-axis ticks
+        # range=[0, 12]  # Optionally set the range of the y-axis
     ),
-    font=dict(size=18)
+    font=dict(size=18)  # Set the global font size for text elements
 )
 
 # Show figure
@@ -263,225 +232,3 @@ fig.show()
 # fig.write_html("MAI090_PercentilesHeatMap.html")
 fig.write_json("MAI090_PercentilesHeatMap.json")
 
-# %% -------------------------------------------------------------------
-
-# # Create the figure
-# fig = go.Figure()
-
-# # Initialize visibility as False for all traces initially
-# all_traces_visibility = {key: False for key in split.keys()}
-
-# # Add traces to the figure for each key in the dictionary
-# for key, data in split.items():
-#     year, depth = key.split('_')
-#     heatmap = go.Heatmap(
-#         z=data.values,
-#         x=data.columns,
-#         y=data.index,
-#         colorscale='balance',
-#         showscale=False,
-#         zmin=-2,
-#         zmax=2,
-#         visible=True,  # Start as invisible
-#         name=f"{year} - {depth}"  # Label each heatmap with year and depth
-#     )
-#     fig.add_trace(heatmap)
-
-# # Function to update visibility based on year and depth
-# def update_visibility(selected_year=None, selected_depth=None):
-#     return [all_traces_visibility.get(f"{yr}_{dp}", False)
-#             for yr, dp in (key.split('_') for key in split.keys())]
-
-# # Dropdown for Years
-# year_buttons = [{
-#     "label": year,
-#     "method": "update",
-#     "args": [{"visible": update_visibility(selected_year=year)}]
-# } for year in sorted(set(key.split('_')[0] for key in split.keys()))]
-
-# # Dropdown for Depths
-# depth_buttons = [{
-#     "label": depth,
-#     "method": "update",
-#     "args": [{"visible": update_visibility(selected_depth=depth)}]
-# } for depth in sorted(set(key.split('_')[1] for key in split.keys()))]
-
-# # Update layout with dual dropdowns
-# fig.update_layout(
-#     updatemenus=[
-#         {"buttons": year_buttons, "direction": "down", "pad": {"r": 10, "t": 10}, "showactive": True,
-#          "x": 0.1, "xanchor": "left", "y": 1.2, "yanchor": "top"},
-#         {"buttons": depth_buttons, "direction": "down", "pad": {"r": 10, "t": 10}, "showactive": True,
-#          "x": 0.3, "xanchor": "left", "y": 1.2, "yanchor": "top"}
-#     ],
-# )
-
-# # Update layout properties
-# fig.update_layout(
-#     xaxis=dict(
-#         title="Day",
-#         tickmode='array',
-#         tickvals=list(range(1,len(Tanom0.columns)+1)),  # Ensure every x-tick has a label
-#         ticktext=Tanom0.columns,  # Custom text for each tick, matching the column labels
-#         tickangle=0,
-#         # range=[0, 31]
-#     ),
-#     yaxis=dict(
-#         title="Month",
-#         tickmode='array',
-#         tickvals=list(range(len(Tanom0.index))),  # Ensure every y-tick has a label
-#         ticktext=Tanom0.index,  # Custom text for each tick, matching the index labels
-#         # range=[0, 12]
-#     ),
-#     font=dict(size=18)
-# )
-
-# # Update layout properties
-# fig.update_layout(
-#     xaxis=dict(
-#         title="Day",
-#         tickmode='array',
-#         tickvals=list(range(1,len(Tanom0.columns)+1)),  # Ensure every x-tick has a label
-#         ticktext=Tanom0.columns,  # Custom text for each tick, matching the column labels
-#         tickangle=0,
-#         # range=[0, 31]
-#     ),
-#     yaxis=dict(
-#         title="Month",
-#         tickmode='array',
-#         tickvals=list(range(len(Tanom0.index))),  # Ensure every y-tick has a label
-#         ticktext=Tanom0.index,  # Custom text for each tick, matching the index labels
-#         # range=[0, 12]
-#     ),
-#     font=dict(size=18)
-# )
-
-# # Show figure
-# fig.show()
-
-# # Save the figure as an HTML file
-# fig.write_html("temperature_anomaly.html")
-
-
-# %%
-
-# # Create heatmap for 10m depth
-# heatmap_surf = go.Heatmap(
-#     z=Tanom0.values,
-#     x=Tanom0.columns,
-#     y=Tanom0.index,
-#     colorscale='balance',
-#     colorbar=None,
-#     zmin=-2,zmax=2,
-#     showscale=False,   
-#     )
-
-
-# # Create heatmap for 20m depth
-# heatmap_21m = go.Heatmap(
-#     z=Tanom1.values,
-#     x=Tanom1.columns,
-#     y=Tanom1.index,
-#     colorscale='balance',
-#     colorbar=None,
-#     zmin=-2,zmax=2,
-#     showscale=False
-# )
-
-# # Create the figure
-# fig = go.Figure()
-
-# # Add the first heatmap (initially shown)
-# fig.add_trace(heatmap_surf)
-
-# # Add the second heatmap (initially hidden)
-# fig.add_trace(heatmap_21m)
-
-# # Define the update menus (dropdowns)
-# fig.update_layout(
-#     updatemenus=[
-#         {
-#             "buttons": [
-#                 {
-#                     "args": [{"visible": [True, False]}],
-#                     "label": "2m Depth",
-#                     "method": "update",
-#                 },
-#                 {
-#                     "args": [{"visible": [False, True]}],
-#                     "label": "21m Depth",
-#                     "method": "update",
-#                 },
-#             ],
-#             "direction": "down",
-#             # Increase padding to make the buttons larger
-#             "pad": {"r": 10, "t": 10, "l": 10, "b": 10},
-#             # Adjust font size to make the text larger
-#             "font": {"size": 30},
-#             "showactive": True,
-#             "x": 0.17,
-#             "xanchor": "left",
-#             "y": 1.15,
-#             "yanchor": "top",
-#         },
-#     ]
-# )
-
-# # Update layout properties
-# fig.update_layout(
-#     xaxis=dict(
-#         title="Day",
-#         tickmode='array',
-#         tickvals=list(range(1,len(Tanom0.columns)+1)),  # Ensure every x-tick has a label
-#         ticktext=Tanom0.columns,  # Custom text for each tick, matching the column labels
-#         tickangle=0,
-#         # range=[0, 31]
-#     ),
-#     yaxis=dict(
-#         title="Month",
-#         tickmode='array',
-#         tickvals=list(range(len(Tanom0.index))),  # Ensure every y-tick has a label
-#         ticktext=Tanom0.index,  # Custom text for each tick, matching the index labels
-#         # range=[0, 12]
-#     ),
-#     font=dict(size=18)
-# )
-
-# # Update the figure layout for a white background and no grid lines
-# fig.update_layout(
-#     plot_bgcolor='white',  # Set the plot background color to white
-#     xaxis=dict(
-#         showgrid=False,  # Disable grid lines for the x-axis
-#         zeroline=False   # Disable the zero line if needed
-#     ),
-#     yaxis=dict(
-#         showgrid=False,  # Disable grid lines for the y-axis
-#         zeroline=False   # Disable the zero line if needed
-#     )
-# )
-
-# # Update the figure layout to invert the y-axis
-# fig.update_layout(
-#     yaxis=dict(
-#         autorange='reversed'  # Invert the y-axis
-#     )
-# )
-
-# # Show figure
-# fig.show()
-
-
-# # Save the figure as an HTML file
-# fig.write_html("temperature_anomaly.html")
-
-# %% --------------------------------------------------------------------
-# convert figure to plotly html
-
-# Step 2: Convert the Matplotlib figure to a Plotly figure
-plotly_fig = tls.mpl_to_plotly(plt.gcf())
-
-# Step 3: Save the Plotly figure as an HTML file
-pio.write_html(plotly_fig, file='PercentilesHeatMap.html', auto_open=True)
-
-# Show the Matplotlib plot
-plt.show()
