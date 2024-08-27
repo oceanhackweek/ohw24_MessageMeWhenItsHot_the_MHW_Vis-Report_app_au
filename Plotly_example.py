@@ -17,3 +17,5 @@ pio.write_html(plotly_fig, file='matplotlib_to_plotly.html', auto_open=True)
 
 # Show the Matplotlib plot
 plt.show()
+
+

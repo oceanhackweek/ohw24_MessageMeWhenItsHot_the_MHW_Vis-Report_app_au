@@ -90,38 +90,38 @@ plt.tight_layout()
 
 # import plotly.graph_objects as go
 
-# # Create a heatmap using Plotly
-# fig = go.Figure(data=go.Heatmap(
-#     z=np.round(Tanom, 2),
-#     colorscale=cmocean.cm.balance(np.linspace(0, 1, 256)),  # Use the same colormap
-#     colorbar=dict(title='Temperature Anomaly', tickvals=np.linspace(np.min(Tanom), np.max(Tanom), 5)),  # Colorbar settings
-#     zmin=np.min(Tanom),  # Set min and max to match your data range
-#     zmax=np.max(Tanom),
-#     text=np.round(Tanom, 2),  # Add annotations
-#     texttemplate='%{text}',
-#     textfont=dict(size=18),
-#     showscale=True
-# ))
+# Create a heatmap using Plotly
+fig = go.Figure(data=go.Heatmap(
+    z=np.round(Tanom, 2),
+    colorscale=cmocean.cm.balance(np.linspace(0, 1, 256)),  # Use the same colormap
+    colorbar=dict(title='Temperature Anomaly', tickvals=np.linspace(np.min(Tanom), np.max(Tanom), 5)),  # Colorbar settings
+    zmin=np.min(Tanom),  # Set min and max to match your data range
+    zmax=np.max(Tanom),
+    text=np.round(Tanom, 2),  # Add annotations
+    texttemplate='%{text}',
+    textfont=dict(size=18),
+    showscale=True
+))
 
-# # Update layout for axis titles and tick labels
-# fig.update_layout(
-#     xaxis=dict(
-#         tickfont=dict(size=30),
-#         title='',
-#     ),
-#     yaxis=dict(
-#         tickfont=dict(size=30),
-#         title='',
-#         tickvals=np.arange(Tanom.shape[0]),  # Set tick values if needed
-#         ticktext=[str(i) for i in range(Tanom.shape[0])]  # Replace with actual y-tick labels
-#     ),
-#     title='Heatmap',
-#     title_x=0.5,
-#     title_font=dict(size=30),
-# )
+# Update layout for axis titles and tick labels
+fig.update_layout(
+    xaxis=dict(
+        tickfont=dict(size=30),
+        title='',
+    ),
+    yaxis=dict(
+        tickfont=dict(size=30),
+        title='',
+        tickvals=np.arange(Tanom.shape[0]),  # Set tick values if needed
+        ticktext=[str(i) for i in range(Tanom.shape[0])]  # Replace with actual y-tick labels
+    ),
+    title='Heatmap',
+    title_x=0.5,
+    title_font=dict(size=30),
+)
 
-# # Show figure
-# fig.show()
+# Show figure
+fig.show()
 
 
 
