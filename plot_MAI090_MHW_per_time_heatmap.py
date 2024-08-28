@@ -65,43 +65,88 @@ def organize_temperature_into_dataframe(temp_dataarray):
 # Extract variables for heatmap
 
 # Get MHW categories
-ds = MAI090['MHW_EVENT_CAT'].copy()
+MHW_CAT = MAI090['MHW_EVENT_CAT'].copy()
+
+# get TEMP during the MHWs
+MHW_TEMP = MAI090['TEMP_INTERP'].where(MAI090['TEMP_EXTREME_INDEX'] == 12)
+
+# combined
+combined = xr.Dataset()
+combined['MHW-CAT'] = MHW_CAT
+combined['MHW-TEMP'] = MHW_TEMP
 
 # %% -------------------------------------------------------------------
 # Function to split the data set into year and depth
 # Have a heatmap for each year and depth, saved inside a dictionary called 'split'
 
-def split_by_year_and_depth(temp_dataarray):
+# def split_by_year_and_depth(temp_dataarray):
+#     """
+#     Splits the temperature data into year and depth.
+    
+#     Parameters:
+#     temp_dataarray (xarray.DataArray): The temperature dataarray with time as one of the coordinates.
+    
+#     Returns:
+#     tuple: A tuple containing the year and depth dataarrays.
+    
+#     """
+#     # identify number of years in data set
+#     years = pd.to_datetime(temp_dataarray['TIME']).year
+#     nY = np.unique(years)
+#     # identify number of depths
+#     nD = temp_dataarray.shape[1]
+#     depths = temp_dataarray['DEPTH'].values
+    
+#     # megaloop to split data into day x month format for each year and depth
+#     split = {}
+#     for yr in nY:
+#         print(yr)
+#         for dep in range(nD):
+#             yr_selection = years == yr
+#             split[str(yr) + '_' + str(int(depths[dep])) + 'm'] = \
+#                 organize_temperature_into_dataframe(
+#                                 temp_dataarray[yr_selection,dep])
+                
+#     return split
+
+# split = split_by_year_and_depth(MHW_CAT)
+
+def split_by_year_depth_and_variable(dataset):
     """
-    Splits the temperature data into year and depth.
+    Splits the dataset into year, depth, and variable type.
     
     Parameters:
-    temp_dataarray (xarray.DataArray): The temperature dataarray with time as one of the coordinates.
+    dataset (xarray.Dataset): The dataset with time, depth, and multiple variables.
     
     Returns:
-    tuple: A tuple containing the year and depth dataarrays.
-    
+    dict: A dictionary with keys formatted as 'year_depthm_variable' and values as dataarrays.
     """
-    # identify number of years in data set
-    years = pd.to_datetime(temp_dataarray['TIME']).year
-    nY = np.unique(years)
-    # identify number of depths
-    nD = temp_dataarray.shape[1]
-    depths = temp_dataarray['DEPTH'].values
+    # Extract unique years from the TIME coordinate
+    years = pd.to_datetime(dataset['TIME'].values).year.unique()
     
-    # megaloop to split data into day x month format for each year and depth
+    # Extract depths from the DEPTH coordinate
+    depths = dataset['DEPTH'].values
+    
+    # Dictionary to hold the split data
     split = {}
-    for yr in nY:
-        print(yr)
-        for dep in range(nD):
-            yr_selection = years == yr
-            split[str(yr) + '_' + str(int(depths[dep])) + 'm'] = \
-                organize_temperature_into_dataframe(
-                                temp_dataarray[yr_selection,dep])
+    
+    # Loop over each data variable, year, and depth
+    for var_name, data_array in dataset.data_vars.items():
+        for year in years:
+            print(year)
+            for depth in depths:
+                # Select data by year and depth for the current variable
+                selection = data_array.sel(TIME=data_array['TIME'].dt.year == year, DEPTH=depth)
                 
+                # Format key as 'year_depthm_variable'
+                key = f"{year}_{int(depth)}m_{var_name}"
+                
+                # Store the selected data in the dictionary
+                split[key] = organize_temperature_into_dataframe(selection)
+    
     return split
 
-split = split_by_year_and_depth(ds)
+split = split_by_year_depth_and_variable(combined)
 
 # %% -------------------------------------------------------------------
 # Create a plotly json file for the web app
@@ -114,6 +159,7 @@ plotly_colorscale = [[i / (len(cmocean_colors) - 1), f'rgb({int(r * 255)}, {int(
 # (This will be the default heatmap when first opened)
 selected_year = '2012'  # default year
 selected_depth = '2m'  # default depth
+selected_variable = 'MHW-CAT'  # default variable
 
 # Create the figure
 fig = go.Figure()
@@ -121,90 +167,118 @@ fig = go.Figure()
 # Add traces for all year and depth combinations
 # traces = plot/graphical objects that makes up a figure
 # Loop over each item in the dictionary called 'split'
+# Assuming 'split' dictionary has keys formatted as "year_depthm_variable"
 for key, data in split.items():
-    # Determine if this particular heatmap should be initially visible
-    # It's visible only if the current key matches a predetermined year and depth
-    visible = key == f"{selected_year}_{selected_depth}"
+    # Extract year, depth, and variable from the key
+    parts = key.split('_')
+    year = parts[0]
+    depth = parts[1]  # Ensure depth includes 'm'
+    variable = parts[2]
 
-    # replace zeros with nans
+    # Determine initial visibility based on the selected year, depth, and variable
+    visible = (year == selected_year and depth == selected_depth and variable == selected_variable)
+
+
+    # Replace zeros with NaNs
     data = data.replace(0, np.nan)
 
-    # Split the key into year and depth components
-    # The key is expected to be in the format 'year_depthm', e.g., '2012_2m'
-    year, depth = key.split('_')
-    
     # Create a text array where NaNs are replaced with empty strings
     text_data = np.where(np.isnan(data), '', data.astype(str))
 
     # Create a heatmap object using Plotly's go.Heatmap
     heatmap = go.Heatmap(
-                z=data,
-                colorscale=plotly_colorscale,  # Use the converted colormap
-                zmin=np.min(data),
-                zmax=np.max(data),
-                text=text_data,  # Display text only where there is data
-                texttemplate='%{text:.0f}',
-                textfont=dict(size=18),
-                showscale=False
-            )
+        z=data.values,  # Assuming 'data' is a DataFrame or compatible format
+        x=data.columns,  # Assuming columns represent X-axis data
+        y=data.index,  # Assuming index represents Y-axis data
+        colorscale=plotly_colorscale,
+        zmin=np.nanmin(data.values),  # Use nanmin to ignore NaNs
+        zmax=np.nanmax(data.values),  # Use nanmax to ignore NaNs
+        text=text_data,
+        texttemplate='%{text:.0f}',
+        textfont=dict(size=18),
+        showscale=False,
+        visible=visible  # Set visibility based on conditions
+    )
 
     # Add the created heatmap to the existing figure
     fig.add_trace(heatmap)
 
 # Function to update the visibility of heatmaps based on selected year and depth
-def create_visibility(selected_year, selected_depth):
+def create_visibility(selected_year, selected_depth, selected_variable):
     # Returns a list of boolean values for each key in the 'split' dictionary
     # True if the key matches the selected year and depth, False otherwise
-    return [k == f"{selected_year}_{selected_depth}" for k in split.keys()]
+     return [k == f"{selected_year}_{selected_depth}_{selected_variable}" for k in split.keys()]
 
-# Dropdown for Years
 year_buttons = [{
-    "label": year,  # Text to display on the dropdown button for each year
-    "method": "update",  # The action to perform when a button is clicked
-    "args": [
-        {"visible": create_visibility(year, selected_depth)},  # Update the visibility of heatmaps
-        {"title": f"Heatmaps for Year: {year} and Depth: {selected_depth}"}  # Update the chart title
-    ]
-} for year in sorted(set(k.split('_')[0] for k in split.keys()))]  # List comprehension to generate a button for each unique year
+    "label": year,
+    "method": "update",
+    "args": [{
+        "visible": create_visibility(year, selected_depth, selected_variable)  # Make sure selected_variable is passed
+    }, {
+        "title": f"Heatmaps for Year: {year}, Depth: {selected_depth}, Variable: {selected_variable}"
+    }]
+} for year in sorted(set(k.split('_')[0] for k in split.keys()))]
 
-# Dropdown for Depths
 depth_buttons = [{
-    "label": depth,  # Text to display on the dropdown button for each depth
-    "method": "update",  # The action to perform when a button is clicked
-    "args": [
-        {"visible": create_visibility(selected_year, depth)},  # Update the visibility of heatmaps
-        {"title": f"Heatmaps for Year: {selected_year} and Depth: {depth}"}  # Update the chart title
-    ]
-} for depth in sorted(set(k.split('_')[1] for k in split.keys()))]  # List comprehension to generate a button for each unique depth
+    "label": depth,
+    "method": "update",
+    "args": [{
+        "visible": create_visibility(selected_year, depth, selected_variable)  # Make sure selected_variable is passed
+    }, {
+        "title": f"Heatmaps for Year: {selected_year}, Depth: {depth}, Variable: {selected_variable}"
+    }]
+} for depth in sorted(set(k.split('_')[1] for k in split.keys()))]
 
+variable_buttons = [{
+    "label": variable,
+    "method": "update",
+    "args": [{
+        "visible": create_visibility(selected_year, selected_depth, variable)  # This is already correctly set
+    }, {
+        "title": f"Heatmaps for Year: {selected_year}, Depth: {selected_depth}, Variable: {variable}"
+    }]
+} for variable in sorted(set(k.split('_')[2] for k in split.keys()))]
 
 # Update layout with dual dropdowns
 fig.update_layout(
     plot_bgcolor='white',  # Sets the plot background to white for better readability
     paper_bgcolor='white',  # Sets the overall figure background to white
-    updatemenus=[  # Configures the dropdown menus for user interactivity
+    updatemenus=[
         {
-            "buttons": year_buttons,  # Buttons created previously for selecting years
-            "direction": "down",  # Dropdown expands downwards
-            "pad": {"r": 10, "t": 10},  # Padding around the dropdown
-            "showactive": True,  # Highlights the active button
-            "x": 0.6,  # X position of the dropdown (percentage of the total width)
-            "xanchor": "left",  # Anchor the dropdown at this x position
-            "y": 1.09,  # Y position of the dropdown (percentage above the plot area)
-            "yanchor": "top"  # Anchor the dropdown at this y position
-        },
-        {
-            "buttons": depth_buttons,  # Buttons created for selecting depths
+            "buttons": year_buttons,
             "direction": "down",
             "pad": {"r": 10, "t": 10},
             "showactive": True,
-            "x": 0.7,  # Slightly to the right of the year dropdown
+            "x": 0.1,
             "xanchor": "left",
-            "y": 1.09,
-            "yanchor": "top"
+            "y": 1.2,
+            "yanchor": "top",
+            # "title": "Select Year:"
+        },
+        {
+            "buttons": depth_buttons,
+            "direction": "down",
+            "pad": {"r": 10, "t": 10},
+            "showactive": True,
+            "x": 0.3,
+            "xanchor": "left",
+            "y": 1.2,
+            "yanchor": "top",
+            # "title": "Select Depth:"
+        },
+        {
+            "buttons": variable_buttons,
+            "direction": "down",
+            "pad": {"r": 10, "t": 10},
+            "showactive": True,
+            "x": 0.5,
+            "xanchor": "left",
+            "y": 1.2,
+            "yanchor": "top",
+            # "title": "Select Variable:"
         }
     ],
-    title=f"Temperature Anomalies for Year: {selected_year} and Depth: {selected_depth}",
+    # title=f"Temperature Anomalies for Year: {selected_year} and Depth: {selected_depth}",
     xaxis=dict(tickangle=0),  # Ensuring x-axis labels are horizontal
     yaxis=dict(autorange='reversed')  # Invert y-axis so higher values appear lower
 )
