@@ -7,7 +7,12 @@ Message Me When It's Hot - The MHW Visualisation and Report App
 Create a Web App to visualize extreme ocean temperatures and send alerts to users when it is TOO HOT!
 
 ## Collaborators
-Anyone is welcome to sign up. Send a message to @mphemming or to @ribeiron on the OHW AUS Slack Channel if you want to be added as a collaborator. 
+@mphemming
+@ribeiron
+@ranisa-gupta16
+@B-stepin
+@bui83
+@JasonUWA
 
 ## Background
 
@@ -38,8 +43,11 @@ Create a Web App that:​
 
   - QC issues are identified (e.g. outliers, drift)​
 
+DISCLAIMER: Until Near Real-Time data is available from the IMOS moorings and FishSOOP, the alerts will be send when new delayed data is added instead. The pla is to send an email with a summary of the data that has been added in relation to the dataset that is available. 
+
 ​The idea is to create a Web App that shows plots similar to the ones in https://www.isithotrightnow.com, but for the ocean. 
 We can look at code from [this project last year](https://github.com/oceanhackweek/ohw23_proj_fancymoorings) - [presentation](https://www.youtube.com/watch?v=90t6h36-BOQ&list=PLVH-j9gOscWmTQNctTx07pf97BRuUxCBX&index=3)
+
 
 ## Datasets
 - IMOS Mooring data:
