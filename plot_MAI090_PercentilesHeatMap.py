@@ -1,6 +1,6 @@
 ##############################
 
-# plot_MAI_PercentilesHeatMap.py
+# plot_MAI090_PercentilesHeatMap.py
 
 # Author: Michael Hemming
 # Description: Plot MAI Percentiles (Using temp anomalies for now) Heatmap for every date, depth, and year
@@ -12,8 +12,6 @@ import xarray as xr
 import numpy as np
 import s3fs
 import pandas as pd
-import cmocean
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 # %% --------------------------------------------------------------------
