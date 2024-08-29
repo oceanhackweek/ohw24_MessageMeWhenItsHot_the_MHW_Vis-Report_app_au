@@ -1,3 +1,7 @@
 */.ipynb_checkpoints/
 *.nc
+<<<<<<< HEAD
 venv/
+=======
+*.html
+>>>>>>> 0ccf5afb3a6f765437aaf2656aae33a59a0fa961
