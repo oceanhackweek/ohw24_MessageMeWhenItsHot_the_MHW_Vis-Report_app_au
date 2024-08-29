@@ -1,0 +1,24 @@
+/* Custom CSS for the Ocean Temperature Visualiser */
+
+.nav-link {
+    font-size: 20px;  /* Increased font size */
+    font-weight: bold; /* Make it bold */
+}
+
+.contact-container {
+    display: none;  /* Initially hidden */
+}
+
+.contact-container.active {
+    display: block;  /* Display when active */
+    animation: slideDown 0.5s ease-out;  /* Slide down effect */
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
