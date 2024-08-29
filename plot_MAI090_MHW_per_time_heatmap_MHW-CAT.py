@@ -65,7 +65,7 @@ def organize_temperature_into_dataframe(temp_dataarray):
 # Extract variables for heatmap
 
 # Get MHW categories
-ds = MAI090['MHW_EVENT_CAT'].copy()
+ds = MAI090['MHW_EVENT_CAT'].sel(TIME=slice('2008-01-01', '2024-01-01')).copy()
 
 # %% -------------------------------------------------------------------
 # Function to split the data set into year and depth
@@ -112,8 +112,8 @@ plotly_colorscale = [[i / (len(cmocean_colors) - 1), f'rgb({int(r * 255)}, {int(
 
 # Initialize variables to store the selected year and depth
 # (This will be the default heatmap when first opened)
-selected_year = '2012'  # default year
-selected_depth = '2m'  # default depth
+selected_year = '2008'  # default year
+selected_depth = '21m'  # default depth
 
 # Create the figure
 fig = go.Figure()
