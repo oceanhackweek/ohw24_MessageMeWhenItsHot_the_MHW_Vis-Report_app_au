@@ -3,19 +3,19 @@ from botocore.exceptions import ClientError
 
 
 def create_email_content(new_data_available, record_broken, temperature_value, summary, location, depth):
-    subject = "New Data Update and Record Broken!"
+    subject = location + ": New Data Update and Record Broken!"
     body = (
         f"Hello,\n\n"
         f"You told us to message you when it is hot. And it is!\n"
         f"We added new data to our website and it tells us a new record has been broken for {location} at {depth}m!\n"
-        f"Temperature Record: {temperature_value}°C\n\n"
+        f"Temperature Anomaly Record: {temperature_value}°C\n\n"
         f"Please read the summary below: {summary}. (In the future, we can add some images to it and increment the wording.)"
         f"Best regards,\nYour Message Me When It's Hot Team"
     )
     return subject, body
 
-email_list = ["natalia.ribeirosantos@utas.edu.au", "ranisa.gupta@csiro.au","m.hemming@unsw.edu.au"]
-temperature_value = "2"
+# email_list = ["natalia.ribeirosantos@utas.edu.au", "ranisa.gupta@csiro.au","m.hemming@unsw.edu.au"]
+temperature_value = "5"
 location='Maria Island'
 depth = '21'
 summary = "A new heatwave has led to unprecedented temperatures."
