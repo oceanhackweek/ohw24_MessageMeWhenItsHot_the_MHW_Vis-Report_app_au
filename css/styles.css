@@ -1,0 +1,180 @@
+body {
+    background-color: #f8f9fa;
+    color: #333333;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    background: linear-gradient(180deg, #27B5C1, #1897A6, #118093, #0B657D); /* Gradient with specified colors */
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.header::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100px;
+    background-image: url('/assets/image.png'); /* Add the wave design image */
+    background-size: cover;
+    position: absolute;
+    bottom: -50px; /* Adjust to make the wave part of the header */
+    left: 0;
+    right: 0;
+    z-index: 5;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+
+.logo {
+    margin-right: 20px;
+    height: 80px; /* Adjust the height to make the logo fit well */
+    border-radius: 15px; /* Apply some rounding to integrate better with the header */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add a slight shadow for depth */
+}
+
+.header-text h1, .header-text h4 {
+    margin: 0;
+}
+
+.header-text h4 {
+    font-size: 1.2em; /* Reduced subtitle size */
+}
+
+.nav-bar {
+    display: flex;
+    gap: 20px;
+    z-index: 10;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.intro-section {
+    height: 500px;
+    padding: 40px 20px;
+    background-image: url('/assets/image.png');  /* Your new image as background */
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    color: white;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.intro-text {
+    max-width: 50%;
+    z-index: 2;
+}
+
+.intro-graphic {
+    max-width: 45%;
+    margin-left: 40px;
+}
+
+.content {
+    padding: 20px;
+}
+
+.plot-section {
+    margin-bottom: 40px;
+    background-color: #001f3f;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.footer {
+    background-color: #002040;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin-top: 40px;
+    position: relative;
+}
+
+.footer::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100px;
+    background-image: url('/assets/image.png'); /* Add the wave design image */
+    background-size: cover;
+    position: absolute;
+    top: -50px; /* Adjust to make the wave part of the footer */
+    left: 0;
+    right: 0;
+    z-index: 5;
+}
+
+.footer-content {
+    margin-bottom: 20px;
+    z-index: 10;
+    position: relative;
+}
+
+.footer-links {
+    margin-top: 10px;
+    z-index: 10;
+    position: relative;
+}
+
+.footer-link {
+    color: white;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+.footer-separator {
+    margin-right: 10px;
+    color: #ffffff;
+}
+
+/* Adding Ocean Animation */
+@keyframes oceanWaves {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.intro-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/assets/image.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.7;
+    z-index: 1;
+    animation: oceanWaves 10s infinite linear;
+}
+
+/* Enhancing the gradient */
+.intro-section {
+    background: linear-gradient(120deg, #002040 0%, #006080 50%, #004080 100%);
+    color: white;
+}

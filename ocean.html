@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Waves Header and Footer</title>
+    <link rel="stylesheet" href="styles.css">
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.wave-header {
+    position: relative;
+    background: linear-gradient(135deg, #00aaff, #0099cc);
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+    overflow: hidden;
+}
+
+.header-content {
+    z-index: 1;
+    position: relative;
+}
+
+.wave-header .wave-svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+}
+
+.wave-header .wave-svg path {
+    fill: #fff;
+}
+
+.main-content {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.wave-footer {
+    position: relative;
+    background: linear-gradient(135deg, #0077aa, #005f8a);
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.wave-footer .wave-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+}
+
+.wave-footer .wave-svg path {
+    fill: #fff;
+}
+
+.footer-content {
+    position: relative;
+    z-index: 1;
+}
+
+</style>
+
+
+
+<body>
+    <header class="wave-header">
+        <div class="header-content">
+            <h1>Ocean Heatwave Visualizer</h1>
+            <p>Track and analyze ocean temperatures worldwide</p>
+        </div>
+        <div class="wave-svg">
+            <svg viewBox="0 0 1440 320"><path fill-opacity="1" d="M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,165.3C672,160,768,128,864,128C960,128,1056,160,1152,170.7C1248,181,1344,171,1392,165.3L1440,160L1440,320L0,320Z"></path></svg>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <!-- Your main content goes here -->
+        <p>Main content area...</p>
+    </div>
+
+    <footer class="wave-footer">
+        <div class="wave-svg">
+            <svg viewBox="0 0 1440 320"><path fill-opacity="1" d="M0,160L48,181.3C96,203,192,245,288,245.3C384,245,480,203,576,165.3C672,128,768,96,864,106.7C960,117,1056,171,1152,202.7C1248,235,1344,245,1392,250.7L1440,256L1440,0L0,0Z"></path></svg>
+        </div>
+        <div class="footer-content">
+            <p>&copy; 2024 Ocean Heatwave Visualizer</p>
+            <p>Contact us: info@oceanheatwave.com</p>
+        </div>
+    </footer>
+</body>
+</html>
+

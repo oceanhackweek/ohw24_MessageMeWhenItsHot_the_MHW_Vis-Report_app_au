@@ -1,0 +1,474 @@
+import dash  # type: ignore
+from dash import dcc, html  # type: ignore
+import dash_bootstrap_components as dbc  # type: ignore
+import plotly.io as pio
+import json
+
+# Suggested name for the web app
+app_name = "Ocean Temperature Visualiser"
+
+# Initialize the Dash app
+app = dash.Dash(__name__,
+                external_stylesheets=[dbc.themes.BOOTSTRAP, "/assets/custom.css"],
+                external_scripts=[
+                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js",  # FontAwesome
+                    "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",  # jQuery
+                    "/assets/custom.js"
+                ],
+                suppress_callback_exceptions=True)
+
+# Load the JSON file for Ocean Temperature Percentiles Heat Map
+json_file_path = 'Figures/MAI090_PercentilesHeatMap.json'
+with open(json_file_path, 'r') as file:
+    json_data = file.read()
+fig_heatmap = pio.from_json(json_data)
+
+# Update layout for Ocean Temperature Percentiles Heat Map
+fig_heatmap.update_layout(
+    title=None,
+    plot_bgcolor='#EEEEEE',
+    xaxis=dict(
+        title="Day",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    yaxis=dict(
+        title="Month",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    legend=dict(
+        title="Legend",
+        title_font=dict(size=18, color='#333333', family='Arial, sans-serif'),
+        font=dict(size=16, color='#333333', family='Arial, sans-serif'),
+        bordercolor='#666666',
+        borderwidth=2,
+    ),
+    margin=dict(l=50, r=50, t=50, b=50),
+    colorway=["#FF5733", "#FF8D1A", "#FFDA44", "#3399FF", "#33CCFF"],
+)
+
+# Load the JSON file for Temperature Distribution Plot (MAI 2m)
+json_file_path_temp_dist = 'Figures/Temp_Distribution_MAI_2m.json'
+with open(json_file_path_temp_dist, 'r') as file:
+    json_data_temp_dist = file.read()
+fig_temp_dist_plot = pio.from_json(json_data_temp_dist)
+
+# Update layout for Temperature Distribution Plot (MAI 2m)
+fig_temp_dist_plot.update_layout(
+    title=None,
+    plot_bgcolor='#EEEEEE',
+    xaxis=dict(
+        title="Day",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    yaxis=dict(
+        title="Temperature (°C)",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    legend=dict(
+        title="Legend",
+        title_font=dict(size=18, color='#333333', family='Arial, sans-serif'),
+        font=dict(size=16, color='#333333', family='Arial, sans-serif'),
+        bordercolor='#666666',
+        borderwidth=2,
+    ),
+    margin=dict(l=50, r=50, t=50, b=50),
+    colorway=["#FF5733", "#FF8D1A", "#FFDA44", "#3399FF", "#33CCFF"],
+)
+
+# Load the JSON file for Temperature Distribution Plot (MAI 21m)
+json_file_path_temp_dist_21m = 'Figures/Temp_Distribution_MAI_21m.json'
+with open(json_file_path_temp_dist_21m, 'r') as file:
+    json_data_temp_dist_21m = file.read()
+fig_temp_dist_plot_21m = pio.from_json(json_data_temp_dist_21m)
+
+# Update layout for Temperature Distribution Plot (MAI 21m)
+fig_temp_dist_plot_21m.update_layout(
+    title=None,
+    plot_bgcolor='#EEEEEE',
+    xaxis=dict(
+        title="Day",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    yaxis=dict(
+        title="Temperature (°C)",
+        titlefont=dict(size=20, color='#333333', family='Arial, sans-serif'),
+        tickfont=dict(size=16, color='#333333', family='Arial, sans-serif'),
+    ),
+    legend=dict(
+        title="Legend",
+        title_font=dict(size=18, color='#333333', family='Arial, sans-serif'),
+        font=dict(size=16, color='#333333', family='Arial, sans-serif'),
+        bordercolor='#666666',
+        borderwidth=2,
+    ),
+    margin=dict(l=50, r=50, t=50, b=50),
+    colorway=["#33FF99", "#FF6699", "#66B2FF", "#FFCC33", "#FF66CC"],
+)
+
+# Introductory page layout
+intro_layout = html.Div(style={'backgroundColor': '#f8f9fa', "height": "100vh", "position": "relative", "overflow": "hidden"}, children=[
+    html.Div([
+        html.Img(src="/assets/new-logo-ohw.jfif", className="intro-logo"),
+        html.H1(app_name, style={'font-size': '64px', 'color': 'white', 'text-align': 'center'}),
+        html.H4("Visualizing the changing temperatures of our oceans", style={'font-size': '24px', 'color': 'white', 'text-align': 'center'}),
+    ], className="intro-text", style={
+        'position': 'absolute',
+        'top': '50%',
+        'left': '50%',
+        'transform': 'translate(-50%, -50%)',
+        'z-index': '2',
+        'text-align': 'center'
+    }),
+    html.Div([
+        html.Img(src="/assets/Gemini_Generated_Image_eh4irueh4irueh4i.jfif", className="intro-background", style={
+            'width': '100%',
+            'height': '100%',
+            'object-fit': 'cover',
+            'position': 'absolute',
+            'top': '0',
+            'left': '0',
+            'z-index': '1'
+        })
+    ])
+])
+
+# Main app layout
+main_layout = html.Div(style={'backgroundColor': '#f8f9fa'}, children=[
+    # Header with Wave Design and Logo
+    html.Header([
+        html.Div([
+            html.Img(src="/assets/new-logo-ohw.jfif", className="logo"),
+            html.Div([
+                html.H1(app_name, style={'margin-bottom': '0px', 'font-size': '32px'}),
+                html.H4("Visualizing the changing temperatures of our oceans", style={'margin-top': '0px', 'font-size': '18px'}),
+            ], className="header-text"),
+        ], className="header-content"),
+        html.Nav([
+            html.A("Home", href="#home", className="nav-link"),
+            html.A("Visualizations", href="#visualizations", className="nav-link"),
+            html.A("About", href="#about", className="nav-link"),
+            html.A("Contact", href="#contact", className="nav-link"),
+        ], className="nav-bar")
+    ], className="header", id="home"),
+
+    # Visualization Section Header
+    html.Section([
+        html.Div([
+            html.H3("Visualizations", style={'font-size': '36px', 'color': '#333333', 'text-align': 'center'}),
+            html.P("Explore detailed visual representations of ocean temperature data below.", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center'}),
+        ], style={'padding': '40px 0'})
+    ], id="visualizations"),
+
+    # Main content with updated layout for the plot section
+    html.Main([
+        html.Section([
+            html.H3([html.I(className="fas fa-thermometer-half"), " Ocean Temperature Percentiles Heat Map"], style={'font-size': '30px', 'color': '#006080', 'text-align': 'center', 'font-weight': 'bold'}),
+            html.P([html.I(className="fas fa-info-circle"), " This plot shows the heat map of ocean temperature percentiles. It helps in understanding the variation of temperature percentiles across different regions."], style={'font-size': '18px', 'color': '#004080', 'text-align': 'center', 'margin-bottom': '20px'}),
+            dcc.Graph(
+                id='heatmap-graph',
+                figure=fig_heatmap
+            ),
+        ], className="plot-section", style={'padding': '20px', 'margin': '60px 0'}),
+
+        html.Section([
+            html.H3([
+                html.I(className="fas fa-water"),
+                " Temperature Distribution Plot (MAI 2m) ",
+                html.Span("2m", style={'color': 'orange', 'font-weight': 'bold', 'margin-left': '10px'})],
+                style={'font-size': '30px', 'color': '#006080', 'text-align': 'center', 'font-weight': 'bold'}),
+            html.P([html.I(className="fas fa-info-circle"), " This plot represents the temperature distribution at 2 meters depth for the MAI location."], style={'font-size': '18px', 'color': '#004080', 'text-align': 'center', 'margin-bottom': '20px'}),
+            dcc.Graph(
+                id='temp-dist-plot-graph',
+                figure=fig_temp_dist_plot
+            ),
+        ], className="plot-section", style={'padding': '20px', 'margin': '60px 0'}),
+
+        html.Section([
+            html.H3([
+                html.I(className="fas fa-water"),
+                " Temperature Distribution Plot (MAI 21m) ",
+                html.Span("21m", style={'color': 'orange', 'font-weight': 'bold', 'margin-left': '10px'})],
+                style={'font-size': '30px', 'color': '#006080', 'text-align': 'center', 'font-weight': 'bold'}),
+            html.P([html.I(className="fas fa-info-circle"), " This plot represents the temperature distribution at 21 meters depth for the MAI location."], style={'font-size': '18px', 'color': '#004080', 'text-align': 'center', 'margin-bottom': '20px'}),
+            dcc.Graph(
+                id='temp-dist-plot-graph-21m',
+                figure=fig_temp_dist_plot_21m
+            ),
+        ], className="plot-section", style={'padding': '20px', 'margin': '60px 0'}),
+    ], className="content"),
+
+    # About Us Section
+    html.Section([
+        html.Div([
+            html.H3("About Us", style={'font-size': '36px', 'color': '#333333', 'text-align': 'center'}),
+            html.P("We are dedicated to providing detailed and accurate visualizations of ocean temperature data. Our mission is to help people understand the effects of ocean temperature changes on marine life and global climate.", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center', 'padding': '20px'}),
+        ], style={'padding': '60px 20px', 'backgroundColor': '#f0f0f0', 'border-radius': '10px'})
+    ], id="about"),
+
+    # Contact Us Section
+    html.Section([
+        html.Div([
+            html.H3("Contact Us", style={'font-size': '36px', 'color': '#333333', 'text-align': 'center'}),
+            html.P("For inquiries, collaborations, or feedback, feel free to reach out to us.", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center'}),
+            html.P("Email: info@oceantempvisualizer.com", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center'}),
+            html.P("Phone: +1 (123) 456-7890", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center'}),
+        ], style={'padding': '60px 20px', 'backgroundColor': '#f0f0f0', 'border-radius': '10px'})
+    ], id="contact"),
+
+    # Footer with Wave Design
+    html.Footer([
+        html.Div([
+            html.P(f"© 2024 {app_name}"),
+            html.P("Disclaimer: The data and information presented on this dashboard are provided for informational purposes only. "
+                   "While every effort has been made to ensure the accuracy of the data, users should verify information before relying on it. "
+                   f"{app_name} and its affiliates do not accept any responsibility for any loss or damage caused by use of the information contained herein."),
+        ], className="footer-content"),
+        html.Div([
+            html.A("Privacy Policy", href="#", className="footer-link"),
+            html.Span(" | ", className="footer-separator"),
+            html.A("Terms of Service", href="#", className="footer-link"),
+        ], className="footer-links")
+    ], className="footer"),
+
+    # Collaborators Section
+    html.Section([
+        html.Div([
+            html.H3("Project Collaborators", style={'font-size': '36px', 'color': '#333333', 'text-align': 'center'}),
+            html.P("John Doe, Jane Smith, Alex Johnson", style={'font-size': '18px', 'color': '#666666', 'text-align': 'center'}),
+        ], style={'padding': '20px 0', 'text-align': 'center'})
+    ])
+])
+
+# Set initial layout to intro page
+# Main app layout with location and page-content
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='interval-holder', children=[dcc.Interval(id='interval-component', interval=3000, n_intervals=0)]),
+    html.Div(id='page-content')
+])
+
+# Callback to switch layouts after intro page
+@app.callback(
+    dash.dependencies.Output('page-content', 'children'),
+    [dash.dependencies.Input('interval-component', 'n_intervals'),
+     dash.dependencies.Input('url', 'pathname')]
+)
+def display_page(n_intervals, pathname):
+    if n_intervals < 1:
+        return intro_layout
+    else:
+        return main_layout
+
+# Internal custom CSS and JavaScript for wave effects and animations
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>''' + app_name + '''</title>
+        <link rel="icon" href="/assets/favicon.jfif" type="image/x-icon">
+        {%css%}
+        <style>
+            body {
+                background-color: #f8f9fa;
+                color: #333333;
+                font-family: Arial, sans-serif;
+            }
+
+            .intro-logo {
+                height: 150px;
+                margin-bottom: 20px;
+            }
+
+            .header {
+                background: linear-gradient(180deg, #27B5C1, #1897A6, #118093, #0B657D);
+                color: white;
+                padding: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: relative;
+                z-index: 10;
+            }
+
+            .header::after {
+                content: "";
+                display: block;
+                width: 100%;
+                height: 100px;
+                background-image: url('/assets/image.png');
+                background-size: cover;
+                position: absolute;
+                bottom: -50px;
+                left: 0;
+                right: 0;
+                z-index: 5;
+            }
+
+            .header-content {
+                display: flex;
+                align-items: center;
+                z-index: 10;
+            }
+
+            .logo {
+                margin-right: 20px;
+                height: 80px;
+                border-radius: 15px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .header-text h1, .header-text h4 {
+                margin: 0;
+            }
+
+            .nav-bar {
+                display: flex;
+                gap: 20px;
+                z-index: 10;
+            }
+
+            .nav-link {
+                color: white;
+                text-decoration: none;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .nav-link:hover {
+                text-decoration: underline;
+            }
+
+            .intro-section {
+                height: 100vh;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                position: relative;
+                z-index: 1;
+                overflow: hidden;
+            }
+
+            .intro-text {
+                max-width: 50%;
+                z-index: 2;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .plot-section {
+                margin-bottom: 60px;
+                background-color: #EEEEEE;
+                color: #333333;
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .contact-container {
+                margin-bottom: 40px;
+                background-color: #002040;
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .footer {
+                background-color: #002040;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                margin-top: 40px;
+                position: relative;
+            }
+
+            .footer::before {
+                content: "";
+                display: block;
+                width: 100%;
+                height: 100px;
+                background-image: url('/assets/image.png');
+                background-size: cover;
+                position: absolute;
+                top: -50px;
+                left: 0;
+                right: 0;
+                z-index: 5;
+            }
+
+            .footer-content {
+                margin-bottom: 20px;
+                z-index: 10;
+                position: relative;
+            }
+
+            .footer-links {
+                margin-top: 10px;
+                z-index: 10;
+                position: relative;
+            }
+
+            .footer-link {
+                color: white;
+                text-decoration: none;
+                margin-right: 10px;
+            }
+
+            .footer-link:hover {
+                text-decoration: underline;
+            }
+
+            .footer-separator {
+                margin-right: 10px;
+                color: #ffffff;
+            }
+
+            @keyframes oceanWaves {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+
+            .intro-section::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image: url('/assets/into-section-cover.jfif');
+                background-repeat: no-repeat;
+                opacity: 0.7;
+                z-index: 1;
+                animation: oceanWaves 10s infinite linear;
+            }
+
+            .intro-section {
+                background: linear-gradient(120deg, #002040 0%, #006080 50%, #004080 100%);
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
