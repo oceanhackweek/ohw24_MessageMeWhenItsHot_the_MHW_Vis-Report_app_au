@@ -77,7 +77,7 @@ save_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_V
 now = datetime.now()
 
 # Format the date and time as 'YYYYMMDD_HHMM'
-formatted_time = now.strftime('%Y%m%d_%H%M')
+formatted_time = now.strftime('%Y%m%d_%H%M%S')
     
 data_to_save = {
     'max_temps_by_year': max_temps_by_year,
@@ -85,7 +85,7 @@ data_to_save = {
 }
 
 # Save data to a pickle file
-with open(save_directory + '\\' + 'maxTemp' + formatted_time + '.pkl', 'wb') as file:
+with open(save_directory + '\\' + 'maxTemp_' + formatted_time + '.pkl', 'wb') as file:
     pkl.dump(data_to_save, file)
     
     
