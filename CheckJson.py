@@ -9,10 +9,21 @@ from datetime import datetime
 # %% ---------------------------------------------
 # Instructions for Ranisa
 
+# This script extracts the maximum temperature anomaly from the JSON file and saves the output as a pickle file
+
 # (1) setup a trigger that runs this script when a new json file is added to the folder
 # (2) change the load directory to where you have stored the json files
 # (3) load the MAI090_PercentilesHeatMap.json file, run the loop
 # (4) change the save directory to where you want to save the pickle file and run code to save
+
+# Notes
+
+# the runpy package could be used to run this script from the web app script?
+# see example below:
+
+# import runpy
+# # Assuming 'my_script' is a module in your Python path
+# runpy.run_path('path/to/my_script.py')
 
 # %% ---------------------------------------------
 # load latest json plot
@@ -20,6 +31,7 @@ from datetime import datetime
 
 load_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_VisReportApp_au\New_data'
 # load_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_VisReportApp_au\Figures'
+
 # Load the JSON file
 with open(load_directory + '\\' + 'MAI090_PercentilesHeatMap.json', 'r') as file:
     heatmaps = json.load(file)
@@ -67,9 +79,14 @@ now = datetime.now()
 # Format the date and time as 'YYYYMMDD_HHMM'
 formatted_time = now.strftime('%Y%m%d_%H%M')
     
+data_to_save = {
+    'max_temps_by_year': max_temps_by_year,
+    'all_time_depth_max': all_time_depth_max
+}
+
 # Save data to a pickle file
 with open(save_directory + '\\' + 'maxTemp' + formatted_time + '.pkl', 'wb') as file:
-    pkl.dump(['max_temps_by_year','all_time_depth_max'], file)
+    pkl.dump(data_to_save, file)
     
     
     
