@@ -5,10 +5,37 @@ import plotly.io as pio
 import json
 import time
 from flask_caching import Cache
+import threading  # <-- Make sure this is imported
+import subprocess
+import dash_html_components as html
+
+script_path = "AWS-SES-SendAcknowledgement.py"
+
+
+# Function to load the HTML file content
+def load_html_content(file_path):
+    with open(file_path, "r") as f:
+        return f.read()
+
+
+# Function to run the two scripts
+def run_scripts():
+    while True:
+        # Run CheckJson.py
+        subprocess.run(["python", "CheckJson.py"])
+        # Run CheckRecord.py
+        subprocess.run(["python", "CheckRecord.py"])
+        # Wait for 2 minutes before running again
+        time.sleep(600)
+
+
+# Start the background task
+script_thread = threading.Thread(target=run_scripts, daemon=True)
+script_thread.start()
 
 
 # Suggested name for the web app
-app_name = "Message Me When It's Hot"
+app_name = "MessageMeWhenItsHot"
 
 # Initialize the Dash app
 app = dash.Dash(
@@ -29,8 +56,8 @@ app = dash.Dash(
 cache = Cache(
     app.server,
     config={
-        "CACHE_TYPE": "simple",  # Using simple cache; for production, you can use Redis or Memcached
-        "CACHE_DEFAULT_TIMEOUT": 300,  # Cache timeout in seconds
+        "CACHE_TYPE": "simple",
+        "CACHE_DEFAULT_TIMEOUT": 300,
     },
 )
 
@@ -57,91 +84,140 @@ def load_and_fix_json(file_path):
     return fig
 
 
-# Function to send email alerts
-# def send_email_alert(to_email, subject, body):
-#     smtp_server = 'smtp.gmail.com'
-#     smtp_port = 587
-#     sender_email = 'cartooncoveinfo@gmail.com'  # Replace with your email
-#     sender_password = 'ILoveC$iro16'  # Replace with your app password or actual password if 2FA is off
-
-#     msg = MIMEMultipart()
-#     msg['From'] = sender_email
-#     msg['To'] = to_email
-#     msg['Subject'] = subject
-#     msg.attach(MIMEText(body, 'plain'))
-
-#     try:
-#         server = smtplib.SMTP(smtp_server, smtp_port)
-#         server.starttls()
-#         server.login(sender_email, sender_password)
-#         server.sendmail(sender_email, to_email, msg.as_string())
-#         server.quit()
-#         return True
-#     except Exception as e:
-#         print(f"Failed to send email: {e}")
-#         return False
-
-# def send_email_alert(to_email, subject, body):
-#     try:
-#         yag = yagmail.SMTP('cartooncoveinfo@gmail.com','ILoveC$iro16')  # Replace with your email and app password
-#         yag.send(to=to_email, subject=subject, contents=body)
-#         return True
-#     except Exception as e:
-#         print(f"Failed to send email: {e}")
-#         return False
-
 # Introductory page layout
-
 
 intro_layout = html.Div(
     style={
-        "backgroundColor": "#f8f9fa",
+        "background-image": "url('/assets/Gemini_Generated_Image_zbsammzbsammzbsa.jfif')",
+        "background-size": "cover",
+        "background-position": "center",
+        "background-repeat": "no-repeat",
         "height": "100vh",
         "position": "relative",
         "overflow": "hidden",
     },
     children=[
         html.Div(
+            style={
+                "position": "absolute",
+                "top": "0",
+                "left": "0",
+                "right": "0",
+                "bottom": "0",
+                "background-color": "rgba(255, 255, 255, 0.7)",
+                "z-index": "1",
+            }
+        ),
+        html.Div(
             [
-                html.Img(src="/assets/new-logo.jfif", className="intro-logo"),
+                html.Img(
+                    src="/assets/message-me-logo.jfif",
+                    style={
+                        "display": "block",
+                        "margin": "0 auto",
+                        "width": "150px",
+                        "height": "150px",
+                        "margin-bottom": "20px",
+                    },
+                ),
                 html.H1(
-                    app_name,
+                    "MessageMeWhenItsHot",
                     style={
                         "font-size": "64px",
-                        "color": "white",
+                        "color": "darkblue",
                         "text-align": "center",
+                        "font-weight": "bold",
+                        "margin-bottom": "20px",
+                    },
+                ),
+                html.H2(
+                    "A web app to visualize ocean temperatures and send alerts to subscribed users when temperatures rise.",
+                    style={
+                        "font-size": "36px",
+                        "color": "darkblue",
+                        "text-align": "center",
+                        "margin-bottom": "20px",
+                    },
+                ),
+                html.P(
+                    "MessageMeWhenItsHot allows users to explore subsurface ocean extremes at coastal locations around Australia. Users are also able to sign up to receive notifications when new data is available and whether or not a temperature record has been broken. It was inspired by the website https://isithotrightnow.com/ and was developed during Ocean Hackweek 2024.",
+                    style={
+                        "font-size": "24px",
+                        "color": "darkblue",
+                        "text-align": "center",
+                        "margin-bottom": "40px",
+                    },
+                ),
+                # Collaborators section
+                html.Div(
+                    [
+                        html.H3(
+                            "Collaborators",
+                            style={
+                                "font-size": "48px",
+                                "color": "darkblue",
+                                "text-align": "left",
+                                "margin-bottom": "20px",
+                            },
+                        ),
+                        html.Ul(
+                            [
+                                html.Li(
+                                    "Michael Hemming",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                                html.Li(
+                                    "Natalia Ribeiro",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                                html.Li(
+                                    "Ranisa Gupta",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                                html.Li(
+                                    "Toan Bui",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                                html.Li(
+                                    "Jun Yu",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                                html.Li(
+                                    "Ben Stepin",
+                                    style={"font-size": "36px", "color": "darkblue"},
+                                ),
+                            ],
+                            style={
+                                "list-style-type": "disc",
+                                "padding-left": "20px",
+                                "font-weight": "bold",
+                                "text-align": "left",
+                            },
+                        ),
+                    ],
+                    style={
+                        "position": "relative",
+                        "top": "0",
+                        "left": "0",
+                        "text-align": "left",
+                        "z-index": "2",
+                        "padding-left": "10px",
                     },
                 ),
             ],
-            className="intro-text",
             style={
                 "position": "absolute",
                 "top": "50%",
                 "left": "50%",
                 "transform": "translate(-50%, -50%)",
-                "z-index": "2",
                 "text-align": "center",
+                "z-index": "2",
+                "width": "80%",
             },
-        ),
-        html.Div(
-            [
-                html.Img(
-                    src="/assets/Gemini_Generated_Image_eh4irueh4irueh4i.jfif",
-                    className="intro-background",
-                    style={
-                        "width": "100%",
-                        "height": "100%",
-                        "object-fit": "cover",
-                        "position": "absolute",
-                        "top": "0",
-                        "left": "0",
-                        "z-index": "1",
-                    },
-                )
-            ]
         ),
     ],
 )
+
 
 # Video cover section with blur overlay and search bar
 video_cover_section = html.Section(
@@ -177,10 +253,111 @@ video_cover_section = html.Section(
                         "backdrop-filter": "blur(8px)",
                     }
                 ),
-                # Search Bar and Content
+                # Subheading, Lines, and Search Bar Content
                 html.Div(
                     [
-                        # Input field with animation
+                        # Subheading
+                        html.H1(
+                            "Is it hot in Maria Island right now?",
+                            style={
+                                "font-size": "36px",
+                                "color": "red",
+                                "text-align": "center",
+                                "margin-bottom": "20px",
+                                "font-weight": "bold",
+                                "margin-top": "3em",
+                                "margin-bottom": "3em",
+                            },
+                        ),
+                        # Temperature and Trend Information
+                        html.Div(
+                            [
+                                # Latest Temperature
+                                html.Div(
+                                    [
+                                        html.I(
+                                            className="fas fa-thermometer-half",
+                                            style={
+                                                "color": "orange",
+                                                "font-size": "36px",
+                                                "margin-right": "10px",
+                                                "vertical-align": "middle",
+                                            },
+                                        ),
+                                        html.Span(
+                                            "Maria Island Latest Temperature: 13.2°C",
+                                            style={
+                                                "font-size": "28px",
+                                                "color": "orange",
+                                                "font-weight": "bold",
+                                                "vertical-align": "middle",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "text-align": "center",
+                                        "margin-bottom": "10px",
+                                    },
+                                ),
+                                # Temperature Trend
+                                html.Div(
+                                    [
+                                        html.I(
+                                            className="fas fa-chart-line",
+                                            style={
+                                                "color": "orange",
+                                                "font-size": "36px",
+                                                "margin-right": "10px",
+                                                "vertical-align": "middle",
+                                            },
+                                        ),
+                                        html.Span(
+                                            "Trend: 0.018°C per year",
+                                            style={
+                                                "font-size": "28px",
+                                                "color": "orange",
+                                                "font-weight": "bold",
+                                                "vertical-align": "middle",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "text-align": "center",
+                                        "margin-bottom": "30px",
+                                    },
+                                ),
+                            ],
+                            style={
+                                "position": "relative",
+                                "z-index": "3",
+                                "margin-bottom": "30px",  # Adjust margin to create spacing
+                            },
+                        ),
+                        # Temperature status
+                        # html.Div(
+                        #     [
+                        #         html.Span(
+                        #             className="fas fa-circle",
+                        #             style={
+                        #                 "color": "red",
+                        #                 "font-size": "36px",
+                        #                 "margin-right": "15px",
+                        #                 "vertical-align": "middle",
+                        #             },
+                        #         ),
+                        #         html.Span(
+                        #             "Hell yeah!",
+                        #             style={
+                        #                 "font-size": "48px",
+                        #                 "color": "white",
+                        #                 "font-weight": "bold",
+                        #                 "vertical-align": "middle",
+                        #             },
+                        #         ),
+                        #     ],
+                        #     style={"text-align": "center", "margin-bottom": "20px"},
+                        # ),
+                        # Search Bar
                         html.Div(
                             [
                                 html.Div(
@@ -224,6 +401,7 @@ video_cover_section = html.Section(
                                         "width": "100%",
                                         "transition": "box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out",
                                         "border": "4px solid transparent",
+                                        "margin-bottom": "2em",
                                     },
                                     className="search-bar",
                                 ),
@@ -232,11 +410,33 @@ video_cover_section = html.Section(
                                 "width": "42%",
                                 "margin": "0 auto",
                                 "text-align": "center",
-                                "margin-top": "25vh",
                                 "position": "relative",
                                 "z-index": "3",
+                                "margin-top": "5em",
                             },
-                        )
+                        ),
+                        # Arrow Down to Visualizations
+                        html.Div(
+                            [
+                                html.A(
+                                    href="#visualizations",
+                                    children=html.I(
+                                        className="fas fa-arrow-down",
+                                        style={
+                                            "font-size": "42px",
+                                            "color": "white",
+                                            "margin-top": "180px",
+                                        },
+                                    ),
+                                ),
+                            ],
+                            style={
+                                "text-align": "center",
+                                "position": "relative",
+                                "z-index": "3",
+                                "margin-top": "4em",
+                            },
+                        ),
                     ],
                     style={"position": "relative", "z-index": "3"},
                 ),
@@ -255,16 +455,37 @@ main_layout = html.Div(
             [
                 html.Div(
                     [
-                        # Logo
-                        html.Img(src="/assets/new-logo.jfif", className="logo"),
-                        html.Div(
-                            [
-                                html.H1(
-                                    app_name,
-                                    style={"margin-bottom": "0px", "font-size": "32px"},
+                        html.A(
+                            href="/home",
+                            children=[
+                                html.Img(
+                                    src="/assets/Gemini_Generated_Image_67twfk67twfk67tw.jfif",
+                                    className="logo",
+                                    style={
+                                        "height": "120px",
+                                        "margin-right": "15px",
+                                    },
+                                ),
+                                html.Div(
+                                    [
+                                        html.H1(
+                                            app_name,
+                                            style={
+                                                "margin-bottom": "0px",
+                                                "font-size": "36px",
+                                                "font-weight": "700",
+                                                "color": "Lightgrey",
+                                            },
+                                        ),
+                                    ],
+                                    className="header-text",
                                 ),
                             ],
-                            className="header-text",
+                            style={
+                                "display": "flex",
+                                "align-items": "center",
+                                "text-decoration": "none",
+                            },
                         ),
                     ],
                     className="header-content",
@@ -281,8 +502,8 @@ main_layout = html.Div(
                         html.A("Contact", href="#contact", className="nav-link"),
                     ],
                     className="nav-bar",
+                    style={"margin-left": "auto"},  # Align nav items to the right
                 ),
-                # Sign-Up Button with Bell Icon and Dark Blue Background
                 html.Div(
                     [
                         html.A(
@@ -291,24 +512,10 @@ main_layout = html.Div(
                                     className="fas fa-bell",
                                     style={"color": "red", "margin-right": "10px"},
                                 ),
-                                "Sign Up",
+                                "SIGN UP",
                             ],
                             href="/signup",
                             className="sign-up-btn",
-                            style={
-                                "background-color": "#0056b3",
-                                "color": "white",
-                                "padding": "10px 20px",
-                                "border-radius": "5px",
-                                "font-size": "18px",
-                                "font-weight": "600",
-                                "position": "relative",
-                                "top": "-10px",
-                                "text-decoration": "none",
-                                "display": "inline-flex",
-                                "align-items": "center",
-                                "margin-top": "1em",
-                            },
                         )
                     ],
                     style={"text-align": "right", "padding-right": "20px"},
@@ -327,10 +534,10 @@ main_layout = html.Div(
                         html.H3(
                             "Visualizations",
                             style={
-                                "font-size": "42px",
-                                "color": "#333333",
+                                "font-size": "44px",
+                                "color": "#172427",
                                 "text-align": "center",
-                                "font-weight": "bold",
+                                "font-weight": "700",
                             },
                         ),
                         html.P(
@@ -348,26 +555,62 @@ main_layout = html.Div(
             ],
             id="visualizations",
         ),
-        # Visualization Sections with Loading Spinner
-        # html.Section([
-        #     html.H3([html.I(className="fas fa-chart-line"), " Daily Average Temperature Plot"], style={'font-size': '34px', 'color': '#006080', 'text-align': 'center', 'font-weight': 'bold'}),
-        #     html.P([html.I(className="fas fa-info-circle"),
-        #             " This plot shows the daily average ocean temperatures, providing insights into temperature trends over time."],
-        #            style={'font-size': '20px', 'color': '#004080', 'text-align': 'center', 'margin-bottom': '20px'}),
-        #     dcc.Loading(
-        #         id="loading-1",
-        #         type="default",
-        #         children=dcc.Graph(id='daily-avg-plot-graph')
-        #     )
-        # ], className="plot-section", style={'padding': '20px', 'margin': '60px 0'}),
         html.Main(
             [
+                # In your layout
+                html.Section(
+                    [
+                        html.H3(
+                            [
+                                html.I(className="fas fa-chart-bar"),
+                                "Maria Island Daily Average Temperature Plot ",
+                            ],
+                            style={
+                                "font-size": "34px",
+                                "color": "#006080",
+                                "text-align": "center",
+                                "font-weight": "bold",
+                            },
+                        ),
+                        html.P(
+                            [
+                                html.I(className="fas fa-info-circle"),
+                                " This plot shows the daily average ocean temperatures, providing insights into temperature trends over time.",
+                            ],
+                            style={
+                                "font-size": "20px",
+                                "color": "#004080",
+                                "text-align": "center",
+                                "margin-bottom": "20px",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.Iframe(
+                                    srcDoc=load_html_content(
+                                        "Figures/DailyAVG_plot.html"
+                                    ),  # Load the HTML content without heading
+                                    style={
+                                        "width": "90%",  # Center the plot by adjusting the width
+                                        "height": "600px",  # Adjust the height as needed
+                                        "border": "none",
+                                        "margin": "0 auto",  # Center the iframe horizontally
+                                        "display": "block",
+                                    },
+                                )
+                            ],
+                            style={"text-align": "center", "margin-top": "20px"},
+                        ),
+                    ],
+                    className="plot-section",
+                    style={"padding": "20px", "margin": "60px 0"},
+                ),
                 html.Section(
                     [
                         html.H3(
                             [
                                 html.I(className="fas fa-thermometer-half"),
-                                " Ocean Temperature Percentiles Heat Map",
+                                " Ocean Temperature Anomalies Heat Map",
                             ],
                             style={
                                 "font-size": "34px",
@@ -392,6 +635,41 @@ main_layout = html.Div(
                             id="loading-2",
                             type="default",
                             children=dcc.Graph(id="heatmap-graph"),
+                        ),
+                    ],
+                    className="plot-section",
+                    style={"padding": "20px", "margin": "60px 0"},
+                ),
+                html.Section(
+                    [
+                        html.H3(
+                            [
+                                html.I(className="fas fa-chart-line"),
+                                " Marine Heatwaves Per Time (Temperature Anomaly) Heatmap",
+                            ],
+                            style={
+                                "font-size": "34px",
+                                "color": "#006080",
+                                "text-align": "center",
+                                "font-weight": "bold",
+                            },
+                        ),
+                        html.P(
+                            [
+                                html.I(className="fas fa-info-circle"),
+                                " This heat map shows marine heatwaves over time and corresponding temperature anomalies.",
+                            ],
+                            style={
+                                "font-size": "20px",
+                                "color": "#004080",
+                                "text-align": "center",
+                                "margin-bottom": "20px",
+                            },
+                        ),
+                        dcc.Loading(
+                            id="loading-temp-anom",
+                            type="default",
+                            children=dcc.Graph(id="temp-anom-heatmap-graph"),
                         ),
                     ],
                     className="plot-section",
@@ -487,76 +765,6 @@ main_layout = html.Div(
                     [
                         html.H3(
                             [
-                                html.I(className="fas fa-thermometer-half"),
-                                " New's Ocean Temperature Heat Map ",
-                                html.Span(
-                                    "2012, 2m",
-                                    style={
-                                        "color": "orange",
-                                        "font-weight": "bold",
-                                        "margin-left": "10px",
-                                    },
-                                ),
-                            ],
-                            style={
-                                "font-size": "34px",
-                                "color": "#006080",
-                                "text-align": "center",
-                                "font-weight": "bold",
-                            },
-                        ),
-                        html.P(
-                            [
-                                html.I(className="fas fa-info-circle"),
-                                " This plot shows the ocean temperature heat map for the year 2012 at a depth of 2 meters. You can explore different years and depths to see how the temperature varies.",
-                            ],
-                            style={
-                                "font-size": "20px",
-                                "color": "#004080",
-                                "text-align": "center",
-                                "margin-bottom": "20px",
-                            },
-                        ),
-                        html.Div(
-                            [
-                                dcc.Dropdown(
-                                    id="year-dropdown",
-                                    options=[
-                                        {"label": str(year), "value": year}
-                                        for year in range(2010, 2021)
-                                    ],
-                                    value=2012,
-                                    style={"width": "48%", "display": "inline-block"},
-                                ),
-                                dcc.Dropdown(
-                                    id="depth-dropdown",
-                                    options=[
-                                        {"label": f"{depth}m", "value": depth}
-                                        for depth in [2, 10, 21]
-                                    ],
-                                    value=2,
-                                    style={
-                                        "width": "48%",
-                                        "display": "inline-block",
-                                        "marginLeft": "4%",
-                                    },
-                                ),
-                            ],
-                            style={"marginBottom": "20px"},
-                        ),
-                        dcc.Loading(
-                            id="loading-5",
-                            type="default",
-                            children=dcc.Graph(id="new-plot-graph"),
-                        ),
-                    ],
-                    className="plot-section",
-                    style={"padding": "20px", "margin": "60px 0"},
-                ),
-                html.Section(
-                    [
-                        html.H3(
-                            [
                                 html.I(className="fas fa-cloud-rain"),
                                 " Rainfall Heat Map",
                                 html.Span(
@@ -591,6 +799,77 @@ main_layout = html.Div(
                             id="loading-6",
                             type="default",
                             children=dcc.Graph(id="rainfall-heatmap-graph"),
+                        ),
+                    ],
+                    className="plot-section",
+                    style={"padding": "20px", "margin": "60px 0"},
+                ),
+                html.Section(
+                    [
+                        html.H3(
+                            [
+                                html.I(className="fas fa-chart-bar"),
+                                " Accumulated Temperature Plot for 2024",
+                            ],
+                            style={
+                                "font-size": "34px",
+                                "color": "#006080",
+                                "text-align": "center",
+                                "font-weight": "bold",
+                            },
+                        ),
+                        html.P(
+                            [
+                                html.I(className="fas fa-info-circle"),
+                                " This plot shows the accumulated ocean temperature data for 2024.",
+                            ],
+                            style={
+                                "font-size": "20px",
+                                "color": "#004080",
+                                "text-align": "center",
+                                "margin-bottom": "20px",
+                            },
+                        ),
+                        dcc.Loading(
+                            id="loading-acumulada",
+                            type="default",
+                            children=dcc.Graph(id="acumulada-plot-graph"),
+                        ),
+                    ],
+                    className="plot-section",
+                    style={"padding": "20px", "margin": "60px 0"},
+                ),
+                # Add this section in the appropriate place within your visualizations section
+                html.Section(
+                    [
+                        html.H3(
+                            [
+                                html.I(className="fas fa-chart-line"),
+                                " Accumulated Temperature Plot for August 2024",
+                            ],
+                            style={
+                                "font-size": "34px",
+                                "color": "#006080",
+                                "text-align": "center",
+                                "font-weight": "bold",
+                            },
+                        ),
+                        html.P(
+                            [
+                                html.I(className="fas fa-info-circle"),
+                                " This plot represents the accumulated ocean temperature data for August 2024, providing insights into temperature accumulation patterns.",
+                            ],
+                            style={
+                                "font-size": "20px",
+                                "color": "#004080",
+                                "text-align": "center",
+                                "margin-bottom": "20px",
+                            },
+                        ),
+                        dcc.Loading(
+                            id="loading-acumulada-aug",
+                            type="default",
+                            children=dcc.Graph(id="acumulada-aug-plot-graph"),
                         ),
                     ],
                     className="plot-section",
@@ -643,9 +922,7 @@ main_layout = html.Div(
                     [
                         html.H3(
                             [
-                                html.I(
-                                    className="fas fa-chart-line"
-                                ),  # You can change the icon class if needed
+                                html.I(className="fas fa-chart-line"),
                                 " Daily Spike in Ocean Temperature",
                             ],
                             style={
@@ -686,82 +963,360 @@ main_layout = html.Div(
             [
                 html.Div(
                     [
-                        html.H3(
-                            "About Us",
-                            style={
-                                "font-size": "36px",
-                                "color": "#333333",
-                                "text-align": "center",
-                            },
-                        ),
-                        html.P(
-                            "We are dedicated to providing detailed and accurate visualizations of ocean temperature data. Our mission is to help people understand the effects of ocean temperature changes on marine life and global climate.",
-                            style={
-                                "font-size": "18px",
-                                "color": "#666666",
-                                "text-align": "center",
-                                "padding": "20px",
-                            },
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.I(
+                                            className="fas fa-info-circle",
+                                            style={
+                                                "font-size": "50px",
+                                                "color": "#FF5733",
+                                                "margin-right": "10px",
+                                            },
+                                        ),
+                                        html.H3(
+                                            "About Us",
+                                            style={
+                                                "font-size": "36px",
+                                                "color": "#333333",
+                                                "font-weight": "bold",
+                                                "margin-bottom": "0px",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "align-items": "center",
+                                        "justify-content": "center",
+                                        "margin-bottom": "20px",
+                                    },
+                                ),
+                                html.Hr(
+                                    style={
+                                        "border": "1px solid #333333",
+                                        "width": "80%",
+                                        "margin": "0 auto",
+                                        "margin-bottom": "20px",
+                                    }
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.Img(
+                                                    src="/assets/message-me-logo.jfif",
+                                                    style={
+                                                        "height": "80px",
+                                                        "vertical-align": "middle",
+                                                        "margin-right": "20px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "MessageMeWhenItsHot",
+                                                    style={
+                                                        "font-size": "36px",
+                                                        "color": "#FF5733",
+                                                        "font-weight": "bold",
+                                                        "vertical-align": "middle",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "flex",
+                                                "align-items": "center",
+                                                "justify-content": "center",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        html.H4(
+                                            "Explore subsurface ocean extremes at coastal locations around Australia.",
+                                            style={
+                                                "font-size": "28px",
+                                                "color": "#333333",
+                                                "text-align": "center",
+                                                "margin-bottom": "20px",
+                                                "font-weight": "normal",
+                                            },
+                                        ),
+                                        html.P(
+                                            [
+                                                "MessageMeWhenItsHot allows users to explore subsurface ocean extremes at coastal locations around Australia. ",
+                                                "Users are also able to sign up to receive notifications when new data is available and whether or not a temperature record has been broken.",
+                                                html.Br(),
+                                                html.Br(),
+                                                html.I(
+                                                    className="fas fa-lightbulb",
+                                                    style={
+                                                        "color": "#FF5733",
+                                                        "margin-right": "10px",
+                                                        "font-size": "20px",
+                                                    },
+                                                ),
+                                                "It was inspired by the website ",
+                                                html.A(
+                                                    "Is it Hot Right Now?",
+                                                    href="https://isithotrightnow.com/",
+                                                    style={
+                                                        "color": "#0056b3",
+                                                        "text-decoration": "underline",
+                                                    },
+                                                ),
+                                                " and was developed during Ocean Hackweek 2024.",
+                                                html.Br(),
+                                                html.Br(),
+                                                html.I(
+                                                    className="fas fa-users",
+                                                    style={
+                                                        "color": "#FF5733",
+                                                        "margin-right": "10px",
+                                                        "font-size": "20px",
+                                                    },
+                                                ),
+                                                html.Strong("Contributors: "),
+                                                html.Span(
+                                                    "Ben Stepin, ",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Jun Yu, ",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Michael Hemming, ",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Natalia Ribeiro, ",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Ranisa Gupta, ",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Toan Bui",
+                                                    style={
+                                                        "color": "#004080",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "font-size": "20px",
+                                                "color": "#555555",
+                                                "text-align": "left",
+                                                "line-height": "1.6",
+                                                "max-width": "800px",
+                                                "margin": "0 auto",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "padding": "60px 20px",
+                                        "backgroundColor": "rgb(57 198 210 / 19%)",
+                                        "border-radius": "10px",
+                                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                        "margin-bottom": "60px",
+                                    },
+                                ),
+                            ]
                         ),
                     ],
-                    style={
-                        "padding": "60px 20px",
-                        "backgroundColor": "#f0f0f0",
-                        "border-radius": "10px",
-                    },
-                )
-            ],
-            id="about",
+                    id="about",
+                ),
+            ]
         ),
+        # Contact Us Section
         # Contact Us Section
         html.Section(
             [
                 html.Div(
                     [
-                        html.H3(
-                            "Contact Us",
-                            style={
-                                "font-size": "36px",
-                                "color": "#333333",
-                                "text-align": "center",
-                            },
-                        ),
-                        html.P(
-                            "For inquiries, collaborations, or feedback, feel free to reach out to us.",
-                            style={
-                                "font-size": "18px",
-                                "color": "#666666",
-                                "text-align": "center",
-                            },
-                        ),
-                        html.P(
-                            "Email: info@oceantempvisualizer.com",
-                            style={
-                                "font-size": "18px",
-                                "color": "#666666",
-                                "text-align": "center",
-                            },
-                        ),
-                        html.P(
-                            "Phone: +1 (123) 456-7890",
-                            style={
-                                "font-size": "18px",
-                                "color": "#666666",
-                                "text-align": "center",
-                            },
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.I(
+                                            className="fas fa-phone-alt",
+                                            style={
+                                                "font-size": "50px",
+                                                "color": "#FF5733",
+                                                "margin-right": "10px",
+                                            },
+                                        ),
+                                        html.H3(
+                                            "Contact Us",
+                                            style={
+                                                "font-size": "36px",
+                                                "color": "#333333",
+                                                "font-weight": "bold",
+                                                "margin-bottom": "0px",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "align-items": "center",
+                                        "justify-content": "center",
+                                        "margin-bottom": "20px",
+                                    },
+                                ),
+                                html.Hr(
+                                    style={
+                                        "border": "1px solid #333333",
+                                        "width": "80%",
+                                        "margin": "0 auto",
+                                        "margin-bottom": "20px",
+                                    }
+                                ),
+                                html.Div(
+                                    [
+                                        html.P(
+                                            [
+                                                html.I(
+                                                    className="fas fa-envelope",
+                                                    style={
+                                                        "color": "#FF5733",
+                                                        "margin-right": "10px",
+                                                    },
+                                                ),
+                                                "You can contact the web app team via email: ",
+                                                html.A(
+                                                    "messagemewhenitshot@gmail.com",
+                                                    href="mailto:messagemewhenitshot@gmail.com",
+                                                    style={
+                                                        "color": "#0056b3",
+                                                        "text-decoration": "underline",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "font-size": "20px",
+                                                "color": "#555555",
+                                                "line-height": "1.6",
+                                                "margin-bottom": "20px",
+                                                "font-weight": "bold",
+                                                "color": "#004080",
+                                                "text-align": "center",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    [
+                                                        html.I(
+                                                            className="fas fa-mail-bulk",
+                                                            style={
+                                                                "color": "#FFC300",
+                                                                "margin-right": "10px",
+                                                                "font-size": "20px",
+                                                            },
+                                                        ),
+                                                        html.Span(
+                                                            "MMWIH HQ",
+                                                            style={
+                                                                "color": "#004080",
+                                                                "font-weight": "bold",
+                                                                "font-size": "22px",
+                                                            },
+                                                        ),
+                                                        html.Br(),
+                                                        html.Span(
+                                                            "Kioloa ANU Coastal Campus,",
+                                                            style={"color": "#555555"},
+                                                        ),
+                                                        html.Br(),
+                                                        html.Span(
+                                                            "496 Murramarang Rd,",
+                                                            style={"color": "#555555"},
+                                                        ),
+                                                        html.Br(),
+                                                        html.Span(
+                                                            "Kioloa NSW 2539",
+                                                            style={"color": "#555555"},
+                                                        ),
+                                                    ],
+                                                    style={
+                                                        "padding": "20px",
+                                                        "backgroundColor": "#f9f9f9",
+                                                        "border-radius": "10px",
+                                                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                                        "margin-bottom": "20px",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.I(
+                                                            className="fas fa-map-marker-alt",
+                                                            style={
+                                                                "color": "#FF5733",
+                                                                "margin-right": "10px",
+                                                                "font-size": "20px",
+                                                            },
+                                                        ),
+                                                        html.Span(
+                                                            "MMWIH Innovation Hub",
+                                                            style={
+                                                                "color": "#004080",
+                                                                "font-weight": "bold",
+                                                                "font-size": "22px",
+                                                            },
+                                                        ),
+                                                        html.Br(),
+                                                        html.Span(
+                                                            "Pebbly Beach,",
+                                                            style={"color": "#555555"},
+                                                        ),
+                                                        html.Br(),
+                                                        html.Span(
+                                                            "NSW 2536",
+                                                            style={"color": "#555555"},
+                                                        ),
+                                                    ],
+                                                    style={
+                                                        "padding": "20px",
+                                                        "backgroundColor": "#f9f9f9",
+                                                        "border-radius": "10px",
+                                                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "max-width": "600px",
+                                                "margin": "0 auto",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "padding": "60px 20px",
+                                        "backgroundColor": "rgb(57 198 210 / 19%)",
+                                        "border-radius": "10px",
+                                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                    },
+                                ),
+                            ]
                         ),
                     ],
-                    style={
-                        "padding": "60px 20px",
-                        "backgroundColor": "#f0f0f0",
-                        "border-radius": "10px",
-                    },
-                )
-            ],
-            id="contact",
+                    id="contact",
+                ),
+            ]
         ),
-        # New footer section  with IMOS acknowledgement
-        # New footer section with IMOS acknowledgment
         # New footer section with IMOS acknowledgment
         html.Footer(
             [
@@ -889,32 +1444,6 @@ main_layout = html.Div(
                 "z-index": "10",
             },
         ),
-        # # Collaborators Section
-        # html.Section(
-        #     [
-        #         html.Div(
-        #             [
-        #                 html.H3(
-        #                     "Project Collaborators",
-        #                     style={
-        #                         "font-size": "36px",
-        #                         "color": "#333333",
-        #                         "text-align": "center",
-        #                     },
-        #                 ),
-        #                 html.P(
-        #                     "John Doe, Jane Smith, Alex Johnson",
-        #                     style={
-        #                         "font-size": "18px",
-        #                         "color": "#666666",
-        #                         "text-align": "center",
-        #                     },
-        #                 ),
-        #             ],
-        #             style={"padding": "20px 0", "text-align": "center"},
-        #         )
-        #     ]
-        # ),
     ],
 )
 
@@ -926,40 +1455,76 @@ signup_layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Img(src="/assets/new-logo-ohw.jfif", className="logo"),
-                        html.Div(
-                            [
-                                html.H1(
-                                    app_name,
+                        html.A(
+                            href="/home",
+                            children=[
+                                html.Img(
+                                    src="/assets/Gemini_Generated_Image_67twfk67twfk67tw.jfif",
+                                    className="logo",
                                     style={
-                                        "margin-bottom": "20px",
-                                        "font-size": "32px",
+                                        "height": "120px",
+                                        "margin-right": "15px",
                                     },
                                 ),
+                                html.Div(
+                                    [
+                                        html.H1(
+                                            app_name,
+                                            style={
+                                                "margin-bottom": "0px",
+                                                "font-size": "36px",
+                                                "font-weight": "700",
+                                                "color": "Lightgrey",
+                                            },
+                                        ),
+                                    ],
+                                    className="header-text",
+                                ),
                             ],
-                            className="header-text",
+                            style={
+                                "display": "flex",
+                                "align-items": "center",
+                                "text-decoration": "none",
+                            },
                         ),
                     ],
                     className="header-content",
                 ),
                 html.Nav(
                     [
-                        html.A("Home", href="/", className="nav-link"),
+                        html.A("Home", href="#home", className="nav-link"),
                         html.A(
                             "Visualizations",
-                            href="#visualizations",
+                            href="/home#visualizations",
                             className="nav-link",
                         ),
                         html.A("About", href="#about", className="nav-link"),
                         html.A("Contact", href="#contact", className="nav-link"),
                     ],
                     className="nav-bar",
+                    style={"margin-left": "auto"},  # Align nav items to the right
+                ),
+                # Sign-Up Button with Bell Icon and Dark Blue Background
+                html.Div(
+                    [
+                        html.A(
+                            [
+                                html.I(
+                                    className="fas fa-bell",
+                                    style={"color": "red", "margin-right": "10px"},
+                                ),
+                                "SIGN UP",
+                            ],
+                            href="/signup",
+                            className="sign-up-btn",
+                        )
+                    ],
+                    style={"text-align": "right", "padding-right": "20px"},
                 ),
             ],
             className="header",
             id="signup-header",
         ),
-        # Sign-up form in a card layout
         html.Div(
             className="d-flex justify-content-center align-items-center",
             style={"height": "73vh", "padding": "60px"},
@@ -1052,7 +1617,7 @@ signup_layout = html.Div(
                                         [
                                             dbc.Col(
                                                 dbc.Button(
-                                                    "Sign Up",
+                                                    "SIGN UP",
                                                     id="signup-button",
                                                     color="primary",
                                                     className="signup-button",
@@ -1068,7 +1633,7 @@ signup_layout = html.Div(
                                                         "transition": "background-image 0.3s ease",
                                                     },
                                                 ),
-                                                width=12,
+                                                width=13,
                                             )
                                         ]
                                     ),
@@ -1083,6 +1648,7 @@ signup_layout = html.Div(
                                     "text-align": "center",
                                 },
                             ),
+                            html.Div(id="email-store", style={"display": "none"}),
                         ]
                     ),
                     style={
@@ -1092,16 +1658,17 @@ signup_layout = html.Div(
                         "border-radius": "12px",
                     },
                 ),
+                # Output to display a console message
+                # html.Div(id="console-output"),
             ],
         ),
-        # New footer section with IMOS acknowledgment
         html.Footer(
             [
                 html.Div(
                     className="d-flex justify-content-between align-items-center",
                     style={
-                        "padding": "10px 20px",  # Adjust padding as needed
-                        "height": "100px",  # Adjust height as needed
+                        "padding": "10px 20px",
+                        "height": "100px",
                     },
                     children=[
                         # IMOS logo on the far left
@@ -1109,9 +1676,8 @@ signup_layout = html.Div(
                             html.Img(
                                 src="/assets/footer-logo.png", style={"height": "75px"}
                             ),
-                            style={"flex": "0 0 auto"},  # Fixed width for logo div
+                            style={"flex": "0 0 auto"},
                         ),
-                        # Acknowledgment content centered
                         html.Div(
                             [
                                 html.P(
@@ -1234,20 +1800,9 @@ def display_page(pathname):
         return main_layout
 
 
-# Callbacks to load and cache the figures
 @cache.memoize()  # Cache this function's result
 def get_plot_data(file_path):
     return load_and_fix_json(file_path)
-
-
-# @app.callback(
-#     Output('daily-avg-plot-graph', 'figure'),
-#     Input('url', 'pathname')
-# )
-# def update_daily_avg_plot(pathname):
-#     if pathname != "/":
-#         return get_plot_data('Figures/DailyAVG_plot.json')
-#     return {}
 
 
 @app.callback(Output("heatmap-graph", "figure"), Input("url", "pathname"))
@@ -1274,7 +1829,21 @@ def update_temp_dist_plot_21m(pathname):
 @app.callback(Output("daily-spike-graph", "figure"), Input("url", "pathname"))
 def update_daily_spike_plot(pathname):
     if pathname != "/":
-        return get_plot_data("Figures/plot_all_daily_spike.json")
+        return get_plot_data("Figures/plot_all_daily_spike_Summer21-22.json")
+    return {}
+
+
+@app.callback(Output("acumulada-plot-graph", "figure"), Input("url", "pathname"))
+def update_acumulada_plot(pathname):
+    if pathname != "/":
+        return get_plot_data("Figures/Acumulada_2024_plot.json")
+    return {}
+
+
+@app.callback(Output("temp-anom-heatmap-graph", "figure"), Input("url", "pathname"))
+def update_temp_anom_heatmap(pathname):
+    if pathname != "/":
+        return get_plot_data("Figures/MAI090_MHW_per_time_heatmap_TEMP-ANOM.json")
     return {}
 
 
@@ -1290,15 +1859,53 @@ def update_new_plot(selected_year, selected_depth):
 @app.callback(Output("rainfall-heatmap-graph", "figure"), Input("url", "pathname"))
 def update_rainfall_heatmap(pathname):
     if pathname != "/":
-        return get_plot_data("Figures/rainfall_heatmap.json")
+        return get_plot_data("Figures/rainfall_heatmap2004-2024.json")
     return {}
 
 
 @app.callback(Output("mhw-heatmap-graph", "figure"), Input("url", "pathname"))
 def update_mhw_heatmap(pathname):
     if pathname != "/":
-        return get_plot_data("Figures/MAI090_MHW_per_time_heatmap.json")
+        return get_plot_data("Figures/MAI090_MHW_per_time_heatmap-new.json")
     return {}
+
+
+@app.callback(Output("acumulada-aug-plot-graph", "figure"), Input("url", "pathname"))
+def update_acumulada_aug_plot(pathname):
+    if pathname != "/":
+        return get_plot_data("Figures/Acumulada_Aug-2024_plot.json")
+    return {}
+
+
+# Callback to Trigger hacky script
+
+
+@app.callback(
+    Output("console-output", "children"),  # Output for console messages
+    Input("signup-button", "n_clicks"),  # Trigger on button click
+    State("email-input", "value"),  # Capture email input value
+)
+
+# Trigger the script from SignUp Button
+def handle_signup(n_clicks, email_value):
+    if n_clicks and email_value:
+        stored_email = email_value
+
+        # Print the stored email to the console
+        print(f"Stored Email: {stored_email}")
+
+        # Run the external Python script
+        try:
+            result = subprocess.run(
+                ["python", script_path], capture_output=True, text=True
+            )
+            print(f"Script Output: {result.stdout}")
+            return f"Script executed successfully for email: {stored_email}"
+        except Exception as e:
+            print(f"Error running script: {e}")
+            return f"Failed to execute script for email: {stored_email}"
+
+    return "Sign-up button not clicked or email not provided."
 
 
 # Internal custom CSS and JavaScript for wave effects and animations
@@ -1361,38 +1968,42 @@ app.index_string = (
             .header-content {
                 display: flex;
                 align-items: center;
-                z-index: 10;
+                font-style: none;
             }
 
             .logo {
                 margin-right: 20px;
-                height: 80px;
+                height: 150px;
                 border-radius: 15px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+                # box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
             }
 
             .header-text h1, .header-text h4 {
                 margin: 0;
             }
 
-            .nav-bar {
-                display: flex;
-                gap: 70px;
-                z-index: 10;
-                margin-top: 3em;
-            }
+           .nav-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    flex: 1;
+    margin-right: 20px;
+}
 
-            .nav-link {
-                color: #0c2024;
-                text-decoration: wavy;
-                font-size: 20px;
-                font-weight: bold;
-            }
+           .nav-link {
+    font-size: 22px;
+    font-weight: bold;
+    padding: 30px 20px;
+    color: Lightgrey;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
 
-            .nav-link:hover {
-                text-decoration: underline;
-                color:darkorange;
-            }
+          .nav-link:hover, .nav-link:focus {
+    background-color: rgba(39, 181, 193, 0.2);  /* Light blue background on hover */
+    color: darkblue;
+}
             .search-bar:hover,
             .search-bar:focus-within {
                 box-shadow: 0 0 30px 10px rgba(39, 181, 193, 0.7), 0 0 30px 10px rgba(0, 128, 128, 0.7);  /* Gradient-like shadow effect */
@@ -1512,12 +2123,6 @@ app.index_string = (
                 color: #ffffff.
             }
 
-            @keyframes oceanWaves {
-                0% { background-position: 0% 50%. }
-                50% { background-position: 100% 50%. }
-                100% { background-position: 0% 50%. }
-            }
-
             .intro-section::before {
                 content: ''.
                 position: absolute.
@@ -1540,9 +2145,27 @@ app.index_string = (
                 padding: 68px;
             }
 
+            .sign-up-btn {
+    background-color: #172427;
+    color: white;
+    padding: 20px 20px;
+    border-radius: 5px;
+    font-size: 21px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.logo {
+    height: 60px;
+    margin-right: 20px;
+}
+
           .signup-button:hover {
-    background-image: linear-gradient(90deg, #0077B6, #0096C7, #00B4D8);  /* Bluish ocean gradient */
-    color: white;  /* Optional: Change text color on hover */
+    background-image: #00448a;
+    color: white;
 }
         </style>
     </head>
@@ -1557,20 +2180,5 @@ app.index_string = (
 </html>
 """
 )
-# Callback to handle signup
-# @app.callback(
-#     Output('signup-message', 'children'),
-#     Input('signup-button', 'n_clicks'),
-#     State('email-input', 'value')
-# )
-# def handle_signup(n_clicks, email):
-#     if n_clicks and email:
-#         success = send_email_alert(email, "Welcome to Message Me When It's Hot!", "Thank you for signing up for alerts!")
-#         if success:
-#             return "Thank you for signing up! You will receive email alerts when new data is available."
-#         else:
-#             return "Failed to sign up. Please try again later."
-#     return ""
-
 if __name__ == "__main__":
     app.run_server(debug=True)

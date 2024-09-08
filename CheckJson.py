@@ -5,6 +5,7 @@ import json
 import pickle as pkl
 import numpy as np
 from datetime import datetime
+import os
 
 # %% ---------------------------------------------
 # Instructions for Ranisa
@@ -26,34 +27,41 @@ from datetime import datetime
 # runpy.run_path('path/to/my_script.py')
 
 # %% ---------------------------------------------
-# load latest json plot
+# Load latest json plot
 # Temp anomaly (called percentiles) plot
 
-load_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_VisReportApp_au\New_data'
-# load_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_VisReportApp_au\Figures'
+# Update the load directory path to your local path
+load_directory = r"New_data"
+
+# Full path to the JSON file
+json_file_path = os.path.join(load_directory, "MAI090_PercentilesHeatMap.json")
 
 # Load the JSON file
-with open(load_directory + '\\' + 'MAI090_PercentilesHeatMap.json', 'r') as file:
-    heatmaps = json.load(file)
-    
+try:
+    with open(json_file_path, "r") as file:
+        heatmaps = json.load(file)
+except FileNotFoundError:
+    print(f"File not found: {json_file_path}")
+    raise
+
 # %% ---------------------------------------------
 # Extract the data from the JSON object
 
-data = heatmaps['data']
+data = heatmaps["data"]
 
 # Prepare to track the maximum temperature anomalies by year
 max_temps_by_year = {}
 
 for n in range(len(data)):
-    x = data[n]['x']
-    y = data[n]['y']
-    z = data[n]['z']
+    x = data[n]["x"]
+    y = data[n]["y"]
+    z = data[n]["z"]
     # Convert None to np.nan
-    z =  np.array(z, dtype=float).flatten()
+    z = np.array(z, dtype=float).flatten()
     z = np.where(z == None, np.nan, z)
-    name = data[n]['name']
-    year = name.split(' ')[0]
-    depth = name.split(' ')[-1]
+    name = data[n]["name"]
+    year = name.split(" ")[0]
+    depth = name.split(" ")[-1]
 
     # Find the maximum temperature anomaly in the data for this year
     if np.isfinite(z).sum() > 10:
@@ -64,29 +72,28 @@ for n in range(len(data)):
 
 all_time_depth_max = np.nanmax(list(max_temps_by_year.values()))
 
-# Output the results
+# Output the results (optional)
 # for year, max_temp in max_temps_by_year.items():
 #     print(f"Year {year}: Max Temperature Anomaly {max_temp}")
-    
-# %% ---------------------------------------------
-# save variables using pickle
 
-save_directory = r'C:\Users\mphem\OneDrive - UNSW\Work\OHW\ohw24_OceanExtremes_VisReportApp_au\New_data'
-    
+# %% ---------------------------------------------
+# Save variables using pickle
+
+# Update the save directory path to the same folder as the JSON file
+save_directory = load_directory  # Use the same directory as the load directory
+
 # Get the current date and time
 now = datetime.now()
 
 # Format the date and time as 'YYYYMMDD_HHMM'
-formatted_time = now.strftime('%Y%m%d_%H%M')
-    
+formatted_time = now.strftime("%Y%m%d_%H%M")
+
 data_to_save = {
-    'max_temps_by_year': max_temps_by_year,
-    'all_time_depth_max': all_time_depth_max
+    "max_temps_by_year": max_temps_by_year,
+    "all_time_depth_max": all_time_depth_max,
 }
 
 # Save data to a pickle file
-with open(save_directory + '\\' + 'maxTemp' + formatted_time + '.pkl', 'wb') as file:
+pickle_file_path = os.path.join(save_directory, f"maxTemp{formatted_time}.pkl")
+with open(pickle_file_path, "wb") as file:
     pkl.dump(data_to_save, file)
-    
-    
-    
